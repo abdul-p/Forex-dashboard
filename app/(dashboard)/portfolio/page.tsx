@@ -187,8 +187,8 @@ export default function PortfolioPage() {
                   borderRadius: "12px",
                   color: "#fff",
                 }}
-                formatter={(value: number) => [
-                  `$${value.toLocaleString()}`,
+                formatter={(value) => [
+                  `$${Number(value).toLocaleString()}`,
                   "Equity",
                 ]}
                 labelStyle={{ color: "#6b7280" }}
@@ -237,7 +237,7 @@ export default function PortfolioPage() {
                     borderRadius: "12px",
                     color: "#fff",
                   }}
-                  formatter={(value: number) => [`$${value}`, "P&L"]}
+                  formatter={(value) => [`$${Number(value).toFixed(2)}`, "P&L"]}
                 />
                 <Bar dataKey="profit" radius={[6, 6, 0, 0]}>
                   {pairChartData.map((entry, index) => (
