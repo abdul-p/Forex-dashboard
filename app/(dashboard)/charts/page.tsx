@@ -54,9 +54,19 @@ export default function ChartsPage() {
   const [loading, setLoading] = useState(true);
   const [currentPrice, setCurrentPrice] = useState<string | null>(null);
 
-  useEffect(() => {
-    fetchChartData();
-  }, [selectedPair, selectedInterval]);
+  const formatTime = (datetime: string, interval: string) => {
+    const date = new Date(datetime);
+    if (interval === "1day") {
+      return date.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+      });
+    }
+    return date.toLocaleTimeString("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
 
   const fetchChartData = async () => {
     setLoading(true);
@@ -90,19 +100,9 @@ export default function ChartsPage() {
     }
   };
 
-  const formatTime = (datetime: string, interval: string) => {
-    const date = new Date(datetime);
-    if (interval === "1day") {
-      return date.toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-      });
-    }
-    return date.toLocaleTimeString("en-US", {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
+  useEffect(() => {
+    fetchChartData();
+  }, [selectedPair, selectedInterval]);
 
   const priceChange =
     chartData.length > 1
@@ -218,7 +218,7 @@ export default function ChartsPage() {
                   borderRadius: "12px",
                   color: "#fff",
                 }}
-                formatter={(value: number) => [value.toFixed(5), "Price"]}
+                formatter={(value) => [Number(value).toFixed(5), "Price"]}
                 labelStyle={{ color: "#6b7280" }}
               />
               <Line
