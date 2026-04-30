@@ -9,6 +9,7 @@ const navItems = [
   { label: "Markets", href: "/markets", icon: "💱" },
   { label: "Charts", href: "/charts", icon: "📈" },
   { label: "Journal", href: "/journal", icon: "📓" },
+  { label: "Portfolio", href: "/portfolio", icon: "💼" },
   { label: "Calendar", href: "/calendar", icon: "📅" },
   { label: "News", href: "/news", icon: "📰" },
   { label: "Settings", href: "/settings", icon: "⚙️" },
