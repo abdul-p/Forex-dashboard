@@ -12,6 +12,8 @@ export interface ITrade extends Document {
   note?: string;
   openedAt: Date;
   closedAt?: Date;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 const TradeSchema = new Schema<ITrade>(
