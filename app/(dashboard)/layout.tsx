@@ -10,12 +10,12 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { data: session, status } = useSession();
+  const { status } = useSession();
   const router = useRouter();
 
   useEffect(() => {
     if (status === "unauthenticated") router.push("/login");
-  }, [status]);
+  }, [router, status]);
 
   if (status === "loading") {
     return (
@@ -28,7 +28,7 @@ export default function DashboardLayout({
   return (
     <div className="min-h-screen bg-gray-950 flex">
       <Sidebar />
-      <main className="flex-1 ml-64 p-8 overflow-y-auto">{children}</main>
+      <main className="ml-72 flex-1 overflow-y-auto p-8">{children}</main>
     </div>
   );
 }

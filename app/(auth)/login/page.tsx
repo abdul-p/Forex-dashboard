@@ -27,6 +27,8 @@ export default function LoginPage() {
     });
 
     if (result?.error) {
+      console.log("Login error:", result.error);
+      console.error(result.error)
       setError(result.error);
       setLoading(false);
       return;
