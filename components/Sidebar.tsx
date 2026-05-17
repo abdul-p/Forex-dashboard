@@ -25,6 +25,21 @@ const configMenuItems = [
   { label: "Settings", href: "/settings", icon: "ST" },
 ];
 
+function CloseIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      className="h-4 w-4"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth="2"
+    >
+      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
+    </svg>
+  );
+}
+
 type SidebarProps = {
   onClose: () => void;
 };
@@ -49,7 +64,7 @@ export default function Sidebar({ onClose }: SidebarProps) {
   ) => (
     <div className="space-y-1">
       <p
-        className={`px-3 pb-2 text-[11px] font-semibold uppercase tracking-wider text-gray-500 ${
+        className={`px-3 pb-2 text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)] ${
           isFirst ? "pt-0" : "pt-5"
         }`}
       >
@@ -64,15 +79,15 @@ export default function Sidebar({ onClose }: SidebarProps) {
             href={item.href}
             className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition ${
               isActive
-                ? "bg-green-400/10 text-green-300 font-medium"
-                : "text-gray-400 hover:bg-gray-800 hover:text-white"
+                ? "bg-[var(--accent-soft)] text-[var(--accent)] font-medium"
+                : "text-[var(--text-muted)] hover:bg-[var(--surface-muted)] hover:text-[var(--foreground)]"
             }`}
           >
             <span
               className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-[10px] font-semibold ${
                 isActive
-                  ? "bg-green-400/15 text-green-300"
-                  : "bg-gray-800 text-gray-500"
+                  ? "bg-[var(--surface)] text-[var(--accent)]"
+                  : "bg-[var(--surface-muted)] text-[var(--text-muted)]"
               }`}
             >
               {item.icon}
@@ -85,22 +100,24 @@ export default function Sidebar({ onClose }: SidebarProps) {
   );
 
   return (
-    <aside className="fixed left-0 top-0 flex h-screen w-72 flex-col border-r border-gray-800 bg-gray-950">
+    <aside className="fixed left-0 top-0 flex h-screen w-72 flex-col border-r border-[var(--border-soft)] bg-[var(--surface)]">
       {/* Logo */}
       <div className="flex items-start justify-between gap-4 p-6">
         <div>
-          <h1 className="text-xl font-bold text-white">
-            Forex<span className="text-green-400">Pro</span>
+          <h1 className="text-xl font-bold text-[var(--foreground)]">
+            Forex<span className="text-[var(--accent)]">Pro</span>
           </h1>
-          <p className="text-gray-500 text-xs mt-1">Trading Dashboard</p>
+          <p className="text-xs mt-1 text-[var(--text-muted)]">
+            Trading Dashboard
+          </p>
         </div>
         <button
           type="button"
           onClick={onClose}
           aria-label="Close sidebar"
-          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-sm font-semibold text-gray-500 transition hover:bg-gray-800 hover:text-white"
+          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-[var(--text-muted)] transition hover:bg-[var(--surface-muted)] hover:text-[var(--foreground)]"
         >
-          x
+          <CloseIcon />
         </button>
       </div>
 
@@ -113,16 +130,20 @@ export default function Sidebar({ onClose }: SidebarProps) {
 
       {/* Bottom */}
       <div className="p-4">
-        <div className="flex items-center gap-3 rounded-xl bg-gray-900 p-3">
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-green-400 text-sm font-bold text-gray-950">
+        <div className="flex items-center gap-2 rounded-lg bg-[var(--surface-muted)] p-2">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[var(--accent)] text-xs font-bold text-[var(--surface)]">
             {initials || "AC"}
           </div>
           <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-semibold text-white">
+            <p className="truncate text-xs font-semibold text-[var(--foreground)]">
               {userName}
             </p>
-            <p className="truncate text-xs text-gray-500">{userEmail}</p>
-            <p className="mt-1 text-xs font-medium text-green-300">Trader</p>
+            <p className="truncate text-[11px] text-[var(--text-muted)]">
+              {userEmail}
+            </p>
+            <p className="mt-0.5 text-[11px] font-medium text-[var(--accent)]">
+              Trader
+            </p>
           </div>
         </div>
       </div>
