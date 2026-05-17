@@ -2,7 +2,7 @@
 
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Sidebar from "@/components/Sidebar";
 
 export default function DashboardLayout({
@@ -12,6 +12,7 @@ export default function DashboardLayout({
 }) {
   const { status } = useSession();
   const router = useRouter();
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   useEffect(() => {
     if (status === "unauthenticated") router.push("/login");
@@ -27,8 +28,25 @@ export default function DashboardLayout({
 
   return (
     <div className="min-h-screen bg-gray-950 flex">
-      <Sidebar />
-      <main className="ml-72 flex-1 overflow-y-auto p-8">{children}</main>
+      {isSidebarOpen ? (
+        <Sidebar onClose={() => setIsSidebarOpen(false)} />
+      ) : (
+        <button
+          type="button"
+          onClick={() => setIsSidebarOpen(true)}
+          aria-label="Open sidebar"
+          className="fixed left-4 top-4 z-20 flex h-10 w-10 items-center justify-center rounded-lg bg-gray-900 text-sm font-semibold text-gray-400 transition hover:bg-gray-800 hover:text-white"
+        >
+          =
+        </button>
+      )}
+      <main
+        className={`flex-1 overflow-y-auto p-8 transition-[margin] ${
+          isSidebarOpen ? "ml-72" : "ml-0"
+        }`}
+      >
+        {children}
+      </main>
     </div>
   );
 }

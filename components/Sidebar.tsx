@@ -25,7 +25,11 @@ const configMenuItems = [
   { label: "Settings", href: "/settings", icon: "ST" },
 ];
 
-export default function Sidebar() {
+type SidebarProps = {
+  onClose: () => void;
+};
+
+export default function Sidebar({ onClose }: SidebarProps) {
   const pathname = usePathname();
   const { data: session } = useSession();
   const userName = session?.user?.name || "Account";
@@ -83,11 +87,21 @@ export default function Sidebar() {
   return (
     <aside className="fixed left-0 top-0 flex h-screen w-72 flex-col border-r border-gray-800 bg-gray-950">
       {/* Logo */}
-      <div className="p-6 border-b border-gray-800">
-        <h1 className="text-xl font-bold text-white">
-          Forex<span className="text-green-400">Pro</span>
-        </h1>
-        <p className="text-gray-500 text-xs mt-1">Trading Dashboard</p>
+      <div className="flex items-start justify-between gap-4 p-6">
+        <div>
+          <h1 className="text-xl font-bold text-white">
+            Forex<span className="text-green-400">Pro</span>
+          </h1>
+          <p className="text-gray-500 text-xs mt-1">Trading Dashboard</p>
+        </div>
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Close sidebar"
+          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-sm font-semibold text-gray-500 transition hover:bg-gray-800 hover:text-white"
+        >
+          x
+        </button>
       </div>
 
       {/* Nav */}
@@ -98,7 +112,7 @@ export default function Sidebar() {
       </nav>
 
       {/* Bottom */}
-      <div className="border-t border-gray-800 p-4">
+      <div className="p-4">
         <div className="flex items-center gap-3 rounded-xl bg-gray-900 p-3">
           <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-green-400 text-sm font-bold text-gray-950">
             {initials || "AC"}
