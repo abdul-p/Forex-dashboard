@@ -42,8 +42,8 @@ export default function DashboardLayout({
         </button>
       )}
       <main
-        className={`flex-1 overflow-y-auto p-8 transition-[margin] ${
-          isSidebarOpen ? "ml-72" : "ml-0"
+        className={`flex-1 overflow-y-auto p-8 transition-[margin,padding] ${
+          isSidebarOpen ? "ml-72" : "ml-0 pl-20"
         }`}
       >
         {children}

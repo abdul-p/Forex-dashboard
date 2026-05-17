@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
+import { Bell } from "lucide-react";
 
 interface Quote {
   pair: string;
@@ -70,36 +71,22 @@ export default function OverviewPage() {
     closedTrades.length > 0
       ? Math.round((winningTrades.length / closedTrades.length) * 100)
       : 0;
+  const userName = session?.user.name?.split(" ")[0] || "Account";
 
   return (
     <div className="space-y-8">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-white">
-            Good{" "}
-            {new Date().getHours() < 12
-              ? "morning"
-              : new Date().getHours() < 17
-                ? "afternoon"
-                : "evening"}
-            , {session?.user.name?.split(" ")[0]} 👋
-          </h1>
-          <p className="text-gray-500 text-sm mt-1">
-            {new Date().toLocaleDateString("en-US", {
-              weekday: "long",
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-            })}
-          </p>
+        <div className="rounded-lg border border-gray-800 px-3 py-2 text-sm font-semibold text-white">
+          {userName}
         </div>
-        <Link
-          href="/journal"
-          className="bg-green-400 text-gray-950 px-4 py-2 rounded-xl text-sm font-bold hover:bg-green-300 transition"
+        <button
+          type="button"
+          aria-label="Notifications"
+          className="flex h-10 w-10 items-center justify-center rounded-lg border border-gray-800 text-gray-400 transition hover:border-gray-700 hover:text-white"
         >
-          + Log Trade
-        </Link>
+          <Bell className="h-4 w-4" />
+        </button>
       </div>
 
       {/* Stats */}
