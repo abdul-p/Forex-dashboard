@@ -106,7 +106,7 @@ export default function SettingsPage() {
         </p>
 
         {success && (
-          <div className="bg-green-400/10 border border-green-400/20 text-green-400 text-sm p-3 rounded-lg mb-4">
+          <div className="bg-[var(--accent-soft)] border border-[var(--border-soft)] text-[var(--accent)] text-sm p-3 rounded-lg mb-4">
             {success}
           </div>
         )}
@@ -128,7 +128,7 @@ export default function SettingsPage() {
               value={formData.name}
               onChange={handleChange}
               required
-              className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-green-400/50"
+              className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/40"
             />
           </div>
 
@@ -159,7 +159,7 @@ export default function SettingsPage() {
                 onChange={handleChange}
                 required
                 step="0.01"
-                className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-green-400/50"
+                className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/40"
               />
             </div>
 
@@ -171,7 +171,7 @@ export default function SettingsPage() {
                 name="currency"
                 value={formData.currency}
                 onChange={handleChange}
-                className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-green-400/50"
+                className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/40"
               >
                 <option value="USD">USD — US Dollar</option>
                 <option value="EUR">EUR — Euro</option>
@@ -184,7 +184,7 @@ export default function SettingsPage() {
           <button
             type="submit"
             disabled={saving}
-            className="w-full bg-green-400 text-gray-950 py-3 rounded-xl text-sm font-bold hover:bg-green-300 transition disabled:opacity-50"
+            className="w-full bg-[var(--accent)] text-gray-950 py-3 rounded-xl text-sm font-bold hover:bg-[var(--dust-grey)] transition disabled:opacity-50"
           >
             {saving ? "Saving..." : "Save Changes"}
           </button>
@@ -209,7 +209,7 @@ export default function SettingsPage() {
           </div>
           <div className="flex items-center justify-between py-2 border-b border-gray-800">
             <span className="text-gray-500">Account balance</span>
-            <span className="text-green-400 font-bold">
+            <span className="text-[var(--accent)] font-bold">
               ${user?.balance?.toLocaleString() || "0"}
             </span>
           </div>

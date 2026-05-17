@@ -90,7 +90,7 @@ export default function PortfolioPage() {
             label: "Account Balance",
             value: `$${stats?.balance.toLocaleString()}`,
             sub: "Current balance",
-            color: "text-green-400",
+            color: "text-[var(--accent)]",
           },
           {
             label: "Total P&L",
@@ -98,7 +98,7 @@ export default function PortfolioPage() {
             sub: `${stats?.closedTrades} closed trades`,
             color:
               (stats?.totalProfit || 0) >= 0
-                ? "text-green-400"
+                ? "text-[var(--accent)]"
                 : "text-red-400",
           },
           {
@@ -106,7 +106,7 @@ export default function PortfolioPage() {
             value: `${stats?.winRate}%`,
             sub: `${stats?.closedTrades} total closed`,
             color:
-              (stats?.winRate || 0) >= 50 ? "text-green-400" : "text-red-400",
+              (stats?.winRate || 0) >= 50 ? "text-[var(--accent)]" : "text-red-400",
           },
           {
             label: "Profit Factor",
@@ -117,7 +117,7 @@ export default function PortfolioPage() {
             sub: "Avg win / avg loss",
             color:
               (stats?.profitFactor || 0) >= 1
-                ? "text-green-400"
+                ? "text-[var(--accent)]"
                 : "text-red-400",
           },
         ].map((stat) => (
@@ -196,10 +196,10 @@ export default function PortfolioPage() {
               <Line
                 type="monotone"
                 dataKey="equity"
-                stroke="#4ade80"
+                stroke="var(--accent)"
                 strokeWidth={2}
                 dot={false}
-                activeDot={{ r: 4, fill: "#4ade80" }}
+                activeDot={{ r: 4, fill: "var(--accent)" }}
               />
             </LineChart>
           </ResponsiveContainer>
@@ -243,7 +243,7 @@ export default function PortfolioPage() {
                   {pairChartData.map((entry, index) => (
                     <Cell
                       key={index}
-                      fill={entry.profit >= 0 ? "#4ade80" : "#f87171"}
+                      fill={entry.profit >= 0 ? "var(--accent)" : "#f87171"}
                     />
                   ))}
                 </Bar>
@@ -275,7 +275,7 @@ export default function PortfolioPage() {
                     </div>
                     <span
                       className={`text-sm font-bold ${
-                        item.profit >= 0 ? "text-green-400" : "text-red-400"
+                        item.profit >= 0 ? "text-[var(--accent)]" : "text-red-400"
                       }`}
                     >
                       {item.profit >= 0 ? "+" : ""}${item.profit.toFixed(2)}

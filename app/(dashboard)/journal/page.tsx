@@ -156,7 +156,7 @@ export default function JournalPage() {
         </div>
         <button
           onClick={() => setShowForm(!showForm)}
-          className="bg-green-400 text-gray-950 px-4 py-2 rounded-xl text-sm font-bold hover:bg-green-300 transition"
+          className="bg-[var(--accent)] text-gray-950 px-4 py-2 rounded-xl text-sm font-bold hover:bg-[var(--dust-grey)] transition"
         >
           {showForm ? "Cancel" : "+ Log Trade"}
         </button>
@@ -174,12 +174,12 @@ export default function JournalPage() {
           {
             label: "Total P&L",
             value: `${totalProfit >= 0 ? "+" : ""}$${totalProfit.toFixed(2)}`,
-            color: totalProfit >= 0 ? "text-green-400" : "text-red-400",
+            color: totalProfit >= 0 ? "text-[var(--accent)]" : "text-red-400",
           },
           {
             label: "Win Rate",
             value: `${winRate}%`,
-            color: winRate >= 50 ? "text-green-400" : "text-red-400",
+            color: winRate >= 50 ? "text-[var(--accent)]" : "text-red-400",
           },
         ].map((stat) => (
           <div
@@ -215,7 +215,7 @@ export default function JournalPage() {
                 name="pair"
                 value={formData.pair}
                 onChange={handleChange}
-                className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-green-400/50"
+                className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/40"
               >
                 {PAIRS.map((p) => (
                   <option key={p} value={p}>
@@ -231,7 +231,7 @@ export default function JournalPage() {
                 name="type"
                 value={formData.type}
                 onChange={handleChange}
-                className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-green-400/50"
+                className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/40"
               >
                 <option value="buy">Buy (Long)</option>
                 <option value="sell">Sell (Short)</option>
@@ -250,7 +250,7 @@ export default function JournalPage() {
                 required
                 step="0.00001"
                 placeholder="e.g. 1.08450"
-                className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-green-400/50"
+                className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/40"
               />
             </div>
 
@@ -265,7 +265,7 @@ export default function JournalPage() {
                 onChange={handleChange}
                 step="0.00001"
                 placeholder="e.g. 1.09200"
-                className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-green-400/50"
+                className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/40"
               />
             </div>
 
@@ -281,7 +281,7 @@ export default function JournalPage() {
                 required
                 step="0.01"
                 placeholder="e.g. 0.10"
-                className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-green-400/50"
+                className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/40"
               />
             </div>
 
@@ -296,7 +296,7 @@ export default function JournalPage() {
                 onChange={handleChange}
                 step="0.01"
                 placeholder="e.g. 45.50 or -23.00"
-                className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-green-400/50"
+                className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/40"
               />
             </div>
 
@@ -306,7 +306,7 @@ export default function JournalPage() {
                 name="status"
                 value={formData.status}
                 onChange={handleChange}
-                className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-green-400/50"
+                className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/40"
               >
                 <option value="open">Open</option>
                 <option value="closed">Closed</option>
@@ -323,7 +323,7 @@ export default function JournalPage() {
                 value={formData.note}
                 onChange={handleChange}
                 placeholder="e.g. Breakout trade on H4"
-                className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-green-400/50"
+                className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/40"
               />
             </div>
 
@@ -331,7 +331,7 @@ export default function JournalPage() {
               <button
                 type="submit"
                 disabled={formLoading}
-                className="w-full bg-green-400 text-gray-950 py-3 rounded-xl text-sm font-bold hover:bg-green-300 transition disabled:opacity-50"
+                className="w-full bg-[var(--accent)] text-gray-950 py-3 rounded-xl text-sm font-bold hover:bg-[var(--dust-grey)] transition disabled:opacity-50"
               >
                 {formLoading ? "Saving..." : "Save Trade"}
               </button>
@@ -348,7 +348,7 @@ export default function JournalPage() {
             onClick={() => setStatusFilter(f)}
             className={`px-4 py-2 rounded-xl text-sm font-medium capitalize transition ${
               statusFilter === f
-                ? "bg-green-400 text-gray-950"
+                ? "bg-[var(--accent)] text-gray-950"
                 : "bg-gray-900 border border-gray-800 text-gray-400 hover:bg-gray-800"
             }`}
           >
@@ -365,7 +365,7 @@ export default function JournalPage() {
           <p className="text-gray-600">No trades found</p>
           <button
             onClick={() => setShowForm(true)}
-            className="text-green-400 text-sm hover:underline mt-2 inline-block"
+            className="text-[var(--accent)] text-sm hover:underline mt-2 inline-block"
           >
             Log your first trade
           </button>
@@ -383,7 +383,7 @@ export default function JournalPage() {
                   <span
                     className={`text-xs px-2 py-0.5 rounded-full font-medium ${
                       trade.type === "buy"
-                        ? "bg-green-400/10 text-green-400"
+                        ? "bg-[var(--accent-soft)] text-[var(--accent)]"
                         : "bg-red-400/10 text-red-400"
                     }`}
                   >
@@ -416,7 +416,7 @@ export default function JournalPage() {
                 {trade.profit !== undefined && (
                   <span
                     className={`text-sm font-bold ${
-                      trade.profit >= 0 ? "text-green-400" : "text-red-400"
+                      trade.profit >= 0 ? "text-[var(--accent)]" : "text-red-400"
                     }`}
                   >
                     {trade.profit >= 0 ? "+" : ""}${trade.profit.toFixed(2)}

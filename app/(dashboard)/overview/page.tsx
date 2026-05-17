@@ -76,14 +76,16 @@ export default function OverviewPage() {
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="rounded-lg border border-gray-800 px-3 py-2 text-sm font-semibold text-white">
-          {userName}
+      <div className="flex min-h-10 items-center justify-between rounded-lg border border-gray-800 bg-gray-950/40 px-3 py-2">
+        <div className="flex min-w-0 items-center gap-2 text-sm">
+          <span className="font-semibold text-white">FXPro</span>
+          <span className="text-gray-600">/</span>
+          <span className="truncate font-medium text-gray-300">{userName}</span>
         </div>
         <button
           type="button"
           aria-label="Notifications"
-          className="flex h-10 w-10 items-center justify-center rounded-lg border border-gray-800 text-gray-400 transition hover:border-gray-700 hover:text-white"
+          className="ml-3 flex h-8 w-8 shrink-0 items-center justify-center rounded-md border-l border-gray-800 pl-3 text-gray-400 transition hover:text-white"
         >
           <Bell className="h-4 w-4" />
         </button>
@@ -96,19 +98,19 @@ export default function OverviewPage() {
             label: "Account Balance",
             value: `$${(session?.user.balance || 0).toLocaleString()}`,
             sub: "Available funds",
-            color: "text-green-400",
+            color: "text-[var(--accent)]",
           },
           {
             label: "Total P&L",
             value: `${totalProfit >= 0 ? "+" : ""}$${totalProfit.toFixed(2)}`,
             sub: `${closedTrades.length} closed trades`,
-            color: totalProfit >= 0 ? "text-green-400" : "text-red-400",
+            color: totalProfit >= 0 ? "text-[var(--accent)]" : "text-red-400",
           },
           {
             label: "Win Rate",
             value: `${winRate}%`,
             sub: `${winningTrades.length} of ${closedTrades.length} trades`,
-            color: winRate >= 50 ? "text-green-400" : "text-red-400",
+            color: winRate >= 50 ? "text-[var(--accent)]" : "text-red-400",
           },
           {
             label: "Open Trades",
@@ -136,7 +138,7 @@ export default function OverviewPage() {
             <h2 className="text-white font-semibold">Live Prices</h2>
             <Link
               href="/markets"
-              className="text-green-400 text-xs hover:underline"
+              className="text-[var(--accent)] text-xs hover:underline"
             >
               View all →
             </Link>
@@ -159,7 +161,7 @@ export default function OverviewPage() {
                       {quote.pair}
                     </span>
                   </div>
-                  <span className="text-sm text-green-400 font-mono font-bold">
+                  <span className="text-sm text-[var(--accent)] font-mono font-bold">
                     {parseFloat(quote.price).toFixed(4)}
                   </span>
                 </div>
@@ -174,7 +176,7 @@ export default function OverviewPage() {
             <h2 className="text-white font-semibold">Recent Trades</h2>
             <Link
               href="/journal"
-              className="text-green-400 text-xs hover:underline"
+              className="text-[var(--accent)] text-xs hover:underline"
             >
               View all →
             </Link>
@@ -187,7 +189,7 @@ export default function OverviewPage() {
               <p className="text-gray-600 text-sm">No trades logged yet</p>
               <Link
                 href="/journal"
-                className="text-green-400 text-xs hover:underline mt-2 inline-block"
+                className="text-[var(--accent)] text-xs hover:underline mt-2 inline-block"
               >
                 Log your first trade
               </Link>
@@ -207,7 +209,7 @@ export default function OverviewPage() {
                       <span
                         className={`text-xs px-2 py-0.5 rounded-full font-medium ${
                           trade.type === "buy"
-                            ? "bg-green-400/10 text-green-400"
+                            ? "bg-[var(--accent-soft)] text-[var(--accent)]"
                             : "bg-red-400/10 text-red-400"
                         }`}
                       >
@@ -230,7 +232,7 @@ export default function OverviewPage() {
                   {trade.profit !== undefined && (
                     <span
                       className={`text-sm font-bold ${
-                        trade.profit >= 0 ? "text-green-400" : "text-red-400"
+                        trade.profit >= 0 ? "text-[var(--accent)]" : "text-red-400"
                       }`}
                     >
                       {trade.profit >= 0 ? "+" : ""}${trade.profit.toFixed(2)}

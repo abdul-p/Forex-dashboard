@@ -44,7 +44,7 @@ export default function LoginPage() {
         {/* Logo */}
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-white">
-            Forex<span className="text-green-400">Pro</span>
+            Forex<span className="text-[var(--accent)]">Pro</span>
           </h1>
           <p className="text-gray-500 text-sm mt-2">
             Sign in to your dashboard
@@ -70,7 +70,7 @@ export default function LoginPage() {
                 onChange={handleChange}
                 required
                 placeholder="you@example.com"
-                className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-green-400/50 focus:border-green-400"
+                className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/40 focus:border-[var(--accent)]"
               />
             </div>
 
@@ -85,14 +85,14 @@ export default function LoginPage() {
                 onChange={handleChange}
                 required
                 placeholder="Your password"
-                className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-green-400/50 focus:border-green-400"
+                className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/40 focus:border-[var(--accent)]"
               />
             </div>
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-green-400 text-gray-950 py-3 rounded-xl text-sm font-bold hover:bg-green-300 transition disabled:opacity-50"
+              className="w-full bg-[var(--accent)] text-gray-950 py-3 rounded-xl text-sm font-bold hover:bg-[var(--dust-grey)] transition disabled:opacity-50"
             >
               {loading ? "Signing in..." : "Sign In"}
             </button>
@@ -100,7 +100,7 @@ export default function LoginPage() {
 
           <p className="text-center text-gray-500 text-sm mt-6">
             Don&apos;t have an account?{" "}
-            <Link href="/register" className="text-green-400 hover:underline">
+            <Link href="/register" className="text-[var(--accent)] hover:underline">
               Create one
             </Link>
           </p>

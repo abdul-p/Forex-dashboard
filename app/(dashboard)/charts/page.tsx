@@ -134,7 +134,7 @@ export default function ChartsPage() {
             onClick={() => setSelectedPair(pair)}
             className={`px-4 py-2 rounded-xl text-sm font-medium transition ${
               selectedPair === pair
-                ? "bg-green-400 text-gray-950"
+                ? "bg-[var(--accent)] text-gray-950"
                 : "bg-gray-900 border border-gray-800 text-gray-400 hover:bg-gray-800"
             }`}
           >
@@ -155,7 +155,7 @@ export default function ChartsPage() {
                   {currentPrice}
                 </span>
                 <span
-                  className={`text-sm font-medium ${isPositive ? "text-green-400" : "text-red-400"}`}
+                  className={`text-sm font-medium ${isPositive ? "text-[var(--accent)]" : "text-red-400"}`}
                 >
                   {isPositive ? "+" : ""}
                   {priceChange.toFixed(5)} ({isPositive ? "+" : ""}
@@ -173,7 +173,7 @@ export default function ChartsPage() {
                 onClick={() => setSelectedInterval(interval.value)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-medium transition ${
                   selectedInterval === interval.value
-                    ? "bg-green-400 text-gray-950"
+                    ? "bg-[var(--accent)] text-gray-950"
                     : "text-gray-500 hover:text-white hover:bg-gray-800"
                 }`}
               >
@@ -224,10 +224,10 @@ export default function ChartsPage() {
               <Line
                 type="monotone"
                 dataKey="price"
-                stroke={isPositive ? "#4ade80" : "#f87171"}
+                stroke={isPositive ? "var(--accent)" : "#f87171"}
                 strokeWidth={2}
                 dot={false}
-                activeDot={{ r: 4, fill: isPositive ? "#4ade80" : "#f87171" }}
+                activeDot={{ r: 4, fill: isPositive ? "var(--accent)" : "#f87171" }}
               />
             </LineChart>
           </ResponsiveContainer>

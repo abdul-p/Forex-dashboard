@@ -50,7 +50,7 @@ export default function RegisterPage() {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-white">
-            Forex<span className="text-green-400">Pro</span>
+            Forex<span className="text-[var(--accent)]">Pro</span>
           </h1>
           <p className="text-gray-500 text-sm mt-2">
             Create your trading account
@@ -76,7 +76,7 @@ export default function RegisterPage() {
                 onChange={handleChange}
                 required
                 placeholder="John Doe"
-                className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-green-400/50 focus:border-green-400"
+                className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/40 focus:border-[var(--accent)]"
               />
             </div>
 
@@ -91,7 +91,7 @@ export default function RegisterPage() {
                 onChange={handleChange}
                 required
                 placeholder="you@example.com"
-                className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-green-400/50 focus:border-green-400"
+                className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/40 focus:border-[var(--accent)]"
               />
             </div>
 
@@ -106,14 +106,14 @@ export default function RegisterPage() {
                 onChange={handleChange}
                 required
                 placeholder="Min. 6 characters"
-                className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-green-400/50 focus:border-green-400"
+                className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/40 focus:border-[var(--accent)]"
               />
             </div>
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-green-400 text-gray-950 py-3 rounded-xl text-sm font-bold hover:bg-green-300 transition disabled:opacity-50"
+              className="w-full bg-[var(--accent)] text-gray-950 py-3 rounded-xl text-sm font-bold hover:bg-[var(--dust-grey)] transition disabled:opacity-50"
             >
               {loading ? "Creating account..." : "Create Account"}
             </button>
@@ -121,7 +121,7 @@ export default function RegisterPage() {
 
           <p className="text-center text-gray-500 text-sm mt-6">
             Already have an account?{" "}
-            <Link href="/login" className="text-green-400 hover:underline">
+            <Link href="/login" className="text-[var(--accent)] hover:underline">
               Sign in
             </Link>
           </p>

@@ -36,14 +36,14 @@ export default function DashboardLayout({
           type="button"
           onClick={() => setIsSidebarOpen(true)}
           aria-label="Open sidebar"
-          className="fixed left-4 top-4 z-20 flex h-10 w-10 items-center justify-center rounded-lg bg-[var(--surface)] text-[var(--text-muted)] shadow-sm ring-1 ring-[var(--border-soft)] transition hover:bg-[var(--surface-muted)] hover:text-[var(--foreground)]"
+          className="fixed left-8 top-8 z-20 flex h-10 w-10 items-center justify-center rounded-lg bg-[var(--surface)] text-[var(--text-muted)] shadow-sm ring-1 ring-[var(--border-soft)] transition hover:bg-[var(--surface-muted)] hover:text-[var(--foreground)]"
         >
           <PanelLeftOpen className="h-5 w-5" />
         </button>
       )}
       <main
         className={`flex-1 overflow-y-auto p-8 transition-[margin,padding] ${
-          isSidebarOpen ? "ml-72" : "ml-0 pl-20"
+          isSidebarOpen ? "ml-72" : "ml-0 pl-24"
         }`}
       >
         {children}

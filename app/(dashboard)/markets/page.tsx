@@ -85,7 +85,7 @@ export default function MarketsPage() {
             onClick={() => setFilter(f)}
             className={`px-4 py-2 rounded-xl text-sm font-medium uppercase transition ${
               filter === f
-                ? "bg-green-400 text-gray-950"
+                ? "bg-[var(--accent)] text-gray-950"
                 : "bg-gray-900 border border-gray-800 text-gray-400 hover:bg-gray-800"
             }`}
           >
@@ -106,7 +106,7 @@ export default function MarketsPage() {
             return (
               <div
                 key={quote.pair}
-                className="bg-gray-900 border border-gray-800 rounded-2xl p-5 hover:border-green-400/30 transition"
+                className="bg-gray-900 border border-gray-800 rounded-2xl p-5 hover:border-[var(--border-soft)] transition"
               >
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-2">
@@ -120,7 +120,7 @@ export default function MarketsPage() {
                       </p>
                     </div>
                   </div>
-                  <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+                  <div className="w-2 h-2 rounded-full bg-[var(--accent)] animate-pulse" />
                 </div>
 
                 <p className="text-2xl font-bold text-white font-mono">
@@ -129,7 +129,7 @@ export default function MarketsPage() {
 
                 <div className="mt-3 pt-3 border-t border-gray-800 flex items-center justify-between">
                   <span className="text-xs text-gray-600">Live price</span>
-                  <span className="text-xs text-green-400 font-medium">
+                  <span className="text-xs text-[var(--accent)] font-medium">
                     ● LIVE
                   </span>
                 </div>

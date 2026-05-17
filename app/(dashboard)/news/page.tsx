@@ -78,7 +78,7 @@ export default function NewsPage() {
               href={article.link}
               target="_blank"
               rel="noopener noreferrer"
-              className="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden hover:border-green-400/30 transition group"
+              className="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden hover:border-[var(--border-soft)] transition group"
             >
               {article.image_url && (
                 <div className="h-40 overflow-hidden">
@@ -94,7 +94,7 @@ export default function NewsPage() {
               )}
               <div className="p-5">
                 <div className="flex items-center gap-2 mb-2">
-                  <span className="text-xs text-green-400 font-medium">
+                  <span className="text-xs text-[var(--accent)] font-medium">
                     {article.source_name}
                   </span>
                   <span className="text-gray-700">·</span>
@@ -102,7 +102,7 @@ export default function NewsPage() {
                     {formatDate(article.pubDate)}
                   </span>
                 </div>
-                <h3 className="text-white font-semibold text-sm leading-snug mb-2 group-hover:text-green-400 transition">
+                <h3 className="text-white font-semibold text-sm leading-snug mb-2 group-hover:text-[var(--accent)] transition">
                   {article.title}
                 </h3>
                 {article.description && (

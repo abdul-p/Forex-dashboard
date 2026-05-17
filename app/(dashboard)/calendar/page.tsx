@@ -60,13 +60,13 @@ export default function CalendarPage() {
   const impactColor: Record<string, string> = {
     High: "text-red-400 bg-red-400/10 border-red-400/20",
     Medium: "text-yellow-400 bg-yellow-400/10 border-yellow-400/20",
-    Low: "text-green-400 bg-green-400/10 border-green-400/20",
+    Low: "text-[var(--accent)] bg-[var(--accent-soft)] border-[var(--border-soft)]",
   };
 
   const impactDot: Record<string, string> = {
     High: "bg-red-400",
     Medium: "bg-yellow-400",
-    Low: "bg-green-400",
+    Low: "bg-[var(--accent)]",
   };
 
   const filteredEvents = events.filter((e) => {
@@ -101,7 +101,7 @@ export default function CalendarPage() {
         {hasHigh && <div className="w-1.5 h-1.5 rounded-full bg-red-400" />}
         {hasMedium && <div className="w-1.5 h-1.5 rounded-full bg-yellow-400" />}
         {!hasHigh && !hasMedium && (
-          <div className="w-1.5 h-1.5 rounded-full bg-green-400" />
+          <div className="w-1.5 h-1.5 rounded-full bg-[var(--accent)]" />
         )}
       </div>
     );
@@ -124,7 +124,7 @@ export default function CalendarPage() {
             onClick={() => setViewMode("list")}
             className={`px-4 py-1.5 rounded-lg text-sm font-medium transition ${
               viewMode === "list"
-                ? "bg-green-400 text-gray-950"
+                ? "bg-[var(--accent)] text-gray-950"
                 : "text-gray-400 hover:text-white"
             }`}
           >
@@ -134,7 +134,7 @@ export default function CalendarPage() {
             onClick={() => setViewMode("calendar")}
             className={`px-4 py-1.5 rounded-lg text-sm font-medium transition ${
               viewMode === "calendar"
-                ? "bg-green-400 text-gray-950"
+                ? "bg-[var(--accent)] text-gray-950"
                 : "text-gray-400 hover:text-white"
             }`}
           >
@@ -151,7 +151,7 @@ export default function CalendarPage() {
             onClick={() => setFilter(f)}
             className={`px-4 py-2 rounded-xl text-sm font-medium capitalize transition ${
               filter === f
-                ? "bg-green-400 text-gray-950"
+                ? "bg-[var(--accent)] text-gray-950"
                 : "bg-gray-900 border border-gray-800 text-gray-400 hover:bg-gray-800"
             }`}
           >
@@ -213,14 +213,14 @@ export default function CalendarPage() {
                 color: #fff;
               }
               .react-calendar__tile--active {
-                background: #4ade80 !important;
+                background: var(--accent) !important;
                 color: #111827 !important;
                 font-weight: bold;
                 border-radius: 8px;
               }
               .react-calendar__tile--now {
                 background: #1f2937;
-                color: #4ade80;
+                color: var(--accent);
                 font-weight: bold;
               }
               .react-calendar__month-view__days__day--neighboringMonth {
@@ -244,7 +244,7 @@ export default function CalendarPage() {
                 <span className="text-xs text-gray-500">Medium</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <div className="w-2 h-2 rounded-full bg-green-400" />
+                <div className="w-2 h-2 rounded-full bg-[var(--accent)]" />
                 <span className="text-xs text-gray-500">Low</span>
               </div>
             </div>
@@ -295,7 +295,7 @@ export default function CalendarPage() {
                       ].map((item) => (
                         <div key={item.label}>
                           <p className="text-gray-600 text-xs">{item.label}</p>
-                          <p className={`text-xs font-mono mt-0.5 ${item.value && item.label === "Actual" ? "text-green-400" : "text-white"}`}>
+                          <p className={`text-xs font-mono mt-0.5 ${item.value && item.label === "Actual" ? "text-[var(--accent)]" : "text-white"}`}>
                             {item.value || "—"}
                           </p>
                         </div>
@@ -361,7 +361,7 @@ export default function CalendarPage() {
                         ].map((item) => (
                           <div key={item.label}>
                             <p className="text-gray-600 text-xs">{item.label}</p>
-                            <p className={`text-xs font-mono mt-0.5 ${item.value && item.label === "Actual" ? "text-green-400" : "text-white"}`}>
+                            <p className={`text-xs font-mono mt-0.5 ${item.value && item.label === "Actual" ? "text-[var(--accent)]" : "text-white"}`}>
                               {item.value || "—"}
                             </p>
                           </div>

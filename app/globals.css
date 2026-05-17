@@ -12,8 +12,8 @@
   --surface-muted: #f4f3f5;
   --border-soft: var(--dust-grey);
   --text-muted: #6f6a73;
-  --accent: #16a34a;
-  --accent-soft: #dcfce7;
+  --accent: var(--pale-slate);
+  --accent-soft: var(--surface-muted);
 }
 
 @theme inline {
@@ -31,8 +31,8 @@
     --surface-muted: #181719;
     --border-soft: #2b292d;
     --text-muted: var(--pale-slate);
-    --accent: #4ade80;
-    --accent-soft: #12351f;
+    --accent: var(--pale-slate);
+    --accent-soft: #242226;
   }
 }
 
