@@ -3,7 +3,14 @@
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
-import { Bell } from "lucide-react";
+import {
+  Bell,
+  Clock3,
+  Globe,
+  ShieldAlert,
+  Timer,
+  Waves,
+} from "lucide-react";
 
 interface Quote {
   pair: string;
@@ -21,18 +28,92 @@ interface Trade {
   openedAt: string;
 }
 
+type SessionBlock = {
+  name: string;
+  start: number;
+  end: number;
+  accent: string;
+};
+
+const FOREX_SESSIONS: SessionBlock[] = [
+  { name: "Sydney", start: 22, end: 7, accent: "bg-slate-500/15 text-slate-200" },
+  { name: "Tokyo", start: 0, end: 9, accent: "bg-zinc-500/15 text-zinc-200" },
+  {
+    name: "London",
+    start: 8,
+    end: 17,
+    accent: "bg-stone-500/15 text-stone-200",
+  },
+  {
+    name: "New York",
+    start: 13,
+    end: 22,
+    accent: "bg-neutral-500/15 text-neutral-200",
+  },
+];
+
+const NOTIFICATIONS = [
+  "High impact news",
+  "Margin warnings",
+  "Price breakouts",
+];
+
+const pad = (value: number) => value.toString().padStart(2, "0");
+
+const sessionIsOpen = (hour: number, start: number, end: number) => {
+  if (start < end) return hour >= start && hour < end;
+  return hour >= start || hour < end;
+};
+
+const sessionRemaining = (hour: number, minute: number, start: number, end: number) => {
+  const currentMinutes = hour * 60 + minute;
+  let endMinutes = end * 60;
+  if (start >= end && currentMinutes >= start * 60) {
+    endMinutes += 24 * 60;
+  }
+  if (start >= end && currentMinutes < start * 60) {
+    return endMinutes - currentMinutes;
+  }
+  return Math.max(endMinutes - currentMinutes, 0);
+};
+
+const formatRemaining = (totalMinutes: number) => {
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  if (hours === 0) return `${minutes}m remaining`;
+  return `${hours}h ${minutes}m remaining`;
+};
+
+const overlapLabel = (openSessions: string[]) => {
+  if (openSessions.includes("London") && openSessions.includes("New York")) {
+    return "London + New York overlap";
+  }
+  if (openSessions.includes("Tokyo") && openSessions.includes("London")) {
+    return "Tokyo + London overlap";
+  }
+  if (openSessions.includes("Sydney") && openSessions.includes("Tokyo")) {
+    return "Sydney + Tokyo overlap";
+  }
+  return "No major overlap";
+};
+
 export default function OverviewPage() {
   const { data: session } = useSession();
   const [quotes, setQuotes] = useState<Quote[]>([]);
   const [trades, setTrades] = useState<Trade[]>([]);
   const [quotesLoading, setQuotesLoading] = useState(true);
   const [tradesLoading, setTradesLoading] = useState(true);
+  const [utcNow, setUtcNow] = useState(() => new Date());
 
   useEffect(() => {
     fetchQuotes();
     fetchTrades();
+    const timeTick = setInterval(() => setUtcNow(new Date()), 1000);
     const interval = setInterval(fetchQuotes, 60000);
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval);
+      clearInterval(timeTick);
+    };
   }, []);
 
   const fetchQuotes = async () => {
@@ -72,23 +153,143 @@ export default function OverviewPage() {
       ? Math.round((winningTrades.length / closedTrades.length) * 100)
       : 0;
   const userName = session?.user.name?.split(" ")[0] || "Account";
+  const utcHour = utcNow.getUTCHours();
+  const utcMinute = utcNow.getUTCMinutes();
+  const utcDayLabel = utcNow.toLocaleDateString("en-US", {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+    timeZone: "UTC",
+  });
+  const utcTimeLabel = `${pad(utcHour)}:${pad(utcMinute)} UTC`;
+  const openSessions = FOREX_SESSIONS.filter((block) =>
+    sessionIsOpen(utcHour, block.start, block.end),
+  );
+  const currentSession =
+    openSessions.find((block) => block.name === "London") ||
+    openSessions[0] ||
+    FOREX_SESSIONS.find((block) => sessionIsOpen(utcHour, block.start, block.end));
+  const currentSessionRemaining = currentSession
+    ? formatRemaining(
+        sessionRemaining(utcHour, utcMinute, currentSession.start, currentSession.end),
+      )
+    : "Session closed";
+  const overlapText = overlapLabel(openSessions.map((block) => block.name));
 
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div className="flex min-h-10 items-center justify-between rounded-lg border border-gray-800 bg-gray-950/40 px-3 py-2">
-        <div className="flex min-w-0 items-center gap-2 text-sm">
-          <span className="font-semibold text-white">FXPro</span>
-          <span className="text-gray-600">/</span>
-          <span className="truncate font-medium text-gray-300">{userName}</span>
+      <div className="rounded-2xl border border-gray-800 bg-gray-950/40 p-4">
+        <div className="flex items-start justify-between gap-4">
+          <div className="min-w-0">
+            <div className="flex items-center gap-2 text-sm">
+              <span className="font-semibold text-white">FXPro</span>
+              <span className="text-gray-600">/</span>
+              <span className="truncate font-medium text-gray-300">
+                {userName}
+              </span>
+            </div>
+            <p className="mt-1 text-xs text-gray-500">
+              Market environment awareness, session timing, and alert status.
+            </p>
+          </div>
+          <button
+            type="button"
+            aria-label="Notifications"
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-gray-800 text-gray-400 transition hover:border-gray-700 hover:text-white"
+          >
+            <Bell className="h-4 w-4" />
+          </button>
         </div>
-        <button
-          type="button"
-          aria-label="Notifications"
-          className="ml-3 flex h-8 w-8 shrink-0 items-center justify-center rounded-md border-l border-gray-800 pl-3 text-gray-400 transition hover:text-white"
-        >
-          <Bell className="h-4 w-4" />
-        </button>
+
+        <div className="mt-4 grid gap-3 lg:grid-cols-[1.25fr_0.9fr_0.85fr]">
+          <div className="rounded-xl border border-gray-800 bg-gray-900/70 p-4">
+            <div className="flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-gray-500">
+              <Globe className="h-4 w-4" />
+              Trading Sessions
+            </div>
+            <div className="mt-4 grid grid-cols-2 gap-2">
+              {FOREX_SESSIONS.map((block) => {
+                const isOpen = sessionIsOpen(utcHour, block.start, block.end);
+                return (
+                  <div
+                    key={block.name}
+                    className={`rounded-lg border px-3 py-2 text-sm ${
+                      isOpen
+                        ? "border-[var(--border-soft)] bg-[var(--accent-soft)] text-white"
+                        : "border-gray-800 bg-gray-950/30 text-gray-500"
+                    }`}
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="font-medium">{block.name}</span>
+                      <span
+                        className={`rounded-full px-2 py-0.5 text-[10px] uppercase tracking-[0.2em] ${block.accent}`}
+                      >
+                        {isOpen ? "Open" : "Closed"}
+                      </span>
+                    </div>
+                    <p className="mt-1 text-[11px] text-gray-500">
+                      {pad(block.start)}:00 - {pad(block.end)}:00 UTC
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
+            <div className="mt-4 rounded-lg border border-gray-800 bg-gray-950/40 px-3 py-2 text-xs text-gray-400">
+              <div className="flex items-center gap-2 text-gray-300">
+                <Waves className="h-4 w-4" />
+                {overlapText}
+              </div>
+              <p className="mt-1">
+                London + New York overlap usually delivers the highest liquidity
+                and widest opportunity range.
+              </p>
+            </div>
+          </div>
+
+          <div className="rounded-xl border border-gray-800 bg-gray-900/70 p-4">
+            <div className="flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-gray-500">
+              <Clock3 className="h-4 w-4" />
+              Date + Time
+            </div>
+            <div className="mt-4">
+              <p className="text-3xl font-semibold text-white">{utcTimeLabel}</p>
+              <p className="mt-1 text-sm text-gray-400">{utcDayLabel}</p>
+            </div>
+            <div className="mt-4 rounded-lg border border-gray-800 bg-gray-950/40 px-3 py-2 text-xs text-gray-400">
+              Timing matters because macro events and session transitions can
+              change spread, momentum, and breakout probability quickly.
+            </div>
+          </div>
+
+          <div className="rounded-xl border border-gray-800 bg-gray-900/70 p-4">
+            <div className="flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-gray-500">
+              <ShieldAlert className="h-4 w-4" />
+              Notifications
+            </div>
+            <div className="mt-4 space-y-3">
+              {NOTIFICATIONS.map((item) => (
+                <div
+                  key={item}
+                  className="flex items-center gap-3 rounded-lg border border-gray-800 bg-gray-950/40 px-3 py-2 text-sm text-gray-200"
+                >
+                  <span className="h-2 w-2 rounded-full bg-[var(--accent)]" />
+                  <span>{item}</span>
+                </div>
+              ))}
+            </div>
+            <div className="mt-4 flex items-center gap-2 rounded-lg border border-gray-800 bg-gray-950/40 px-3 py-2 text-xs text-gray-400">
+              <Timer className="h-4 w-4 text-[var(--accent)]" />
+              {currentSession ? (
+                <span>
+                  {currentSession.name} session is open, {currentSessionRemaining}.
+                </span>
+              ) : (
+                <span>No major session is open right now.</span>
+              )}
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Stats */}
