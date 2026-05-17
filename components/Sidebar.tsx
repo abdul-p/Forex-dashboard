@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { signOut, useSession } from "next-auth/react";
+import { useSession } from "next-auth/react";
 
 const mainMenuItems = [
   { label: "Overview", href: "/overview", icon: "OV" },
@@ -91,14 +91,14 @@ export default function Sidebar() {
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 overflow-y-auto p-4">
+      <nav className="flex-1 overflow-y-auto p-4 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
         {renderNavGroup("Main Menu", mainMenuItems, true)}
         {renderNavGroup("Menu", menuItems)}
         {renderNavGroup("Config Menu", configMenuItems)}
       </nav>
 
       {/* Bottom */}
-      <div className="space-y-3 border-t border-gray-800 p-4">
+      <div className="border-t border-gray-800 p-4">
         <div className="flex items-center gap-3 rounded-xl bg-gray-900 p-3">
           <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-green-400 text-sm font-bold text-gray-950">
             {initials || "AC"}
@@ -111,15 +111,6 @@ export default function Sidebar() {
             <p className="mt-1 text-xs font-medium text-green-300">Trader</p>
           </div>
         </div>
-        <button
-          onClick={() => signOut({ callbackUrl: "/login" })}
-          className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-gray-400 transition hover:bg-gray-800 hover:text-white"
-        >
-          <span className="flex h-7 w-7 items-center justify-center rounded-md bg-gray-800 text-[10px] font-semibold text-gray-500">
-            SO
-          </span>
-          Sign Out
-        </button>
       </div>
     </aside>
   );
