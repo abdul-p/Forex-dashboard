@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { Bell, Clock3 } from "lucide-react";
@@ -27,6 +27,14 @@ interface CalendarEvent {
   date: string;
   time: string;
   impact?: "High" | "Medium" | "Low";
+}
+
+interface Candle {
+  datetime: string;
+  open: string;
+  high: string;
+  low: string;
+  close: string;
 }
 
 type SessionBlock = {
@@ -81,19 +89,86 @@ const overlapLabel = (openSessions: string[]) => {
   return "No major overlap";
 };
 
+const getForexMarketState = (date: Date) => {
+  const utcDay = date.getUTCDay();
+  const utcHour = date.getUTCHours();
+  const utcMinute = date.getUTCMinutes();
+  const utcMinutes = utcHour * 60 + utcMinute;
+  const fridayClose = 22 * 60;
+  const sundayOpen = 22 * 60;
+
+  if (utcDay === 6) return "Closed";
+  if (utcDay === 0 && utcMinutes < sundayOpen) return "Closed";
+  if (utcDay === 5 && utcMinutes >= fridayClose) return "Closed";
+  return "Open";
+};
+
+const calculateAtrPercent = (candles: Candle[]) => {
+  if (candles.length < 2) return null;
+
+  const chronological = candles.slice().reverse();
+  const ranges = chronological.slice(1, 15).map((candle, index) => {
+    const previousClose = Number(chronological[index].close);
+    const high = Number(candle.high);
+    const low = Number(candle.low);
+    return Math.max(
+      high - low,
+      Math.abs(high - previousClose),
+      Math.abs(low - previousClose),
+    );
+  });
+  const latestClose = Number(chronological[chronological.length - 1].close);
+  if (!ranges.length || !latestClose) return null;
+
+  const atr = ranges.reduce((sum, range) => sum + range, 0) / ranges.length;
+  return (atr / latestClose) * 100;
+};
+
+const getVolatilityLevel = (atrPercent: number | null) => {
+  if (atrPercent === null) return { label: "Loading", detail: "ATR pending" };
+  if (atrPercent >= 0.35) return { label: "High", detail: `${atrPercent.toFixed(2)}% ATR` };
+  if (atrPercent >= 0.18) return { label: "Moderate", detail: `${atrPercent.toFixed(2)}% ATR` };
+  return { label: "Low", detail: `${atrPercent.toFixed(2)}% ATR` };
+};
+
+const getRiskSentiment = (changes: Record<string, number>) => {
+  const hasMovement = ["AUD/USD", "GBP/USD", "USD/JPY", "USD/CHF"].some(
+    (pair) => changes[pair] !== undefined,
+  );
+  const growthCurrencies =
+    (changes["AUD/USD"] || 0) + (changes["GBP/USD"] || 0);
+  const safetyCurrencies =
+    (changes["USD/JPY"] || 0) + (changes["USD/CHF"] || 0);
+
+  if (!hasMovement) {
+    return { label: "Neutral", detail: "Waiting for price movement" };
+  }
+  if (growthCurrencies > Math.abs(safetyCurrencies)) {
+    return { label: "Risk-On", detail: "AUD/GBP bid" };
+  }
+  if (safetyCurrencies > Math.abs(growthCurrencies)) {
+    return { label: "Risk-Off", detail: "USD/JPY/CHF bid" };
+  }
+  return { label: "Neutral", detail: "Mixed currency flow" };
+};
+
 export default function OverviewPage() {
   const { data: session } = useSession();
   const [quotes, setQuotes] = useState<Quote[]>([]);
+  const [quoteChanges, setQuoteChanges] = useState<Record<string, number>>({});
   const [trades, setTrades] = useState<Trade[]>([]);
   const [events, setEvents] = useState<CalendarEvent[]>([]);
+  const [marketCandles, setMarketCandles] = useState<Candle[]>([]);
   const [quotesLoading, setQuotesLoading] = useState(true);
   const [tradesLoading, setTradesLoading] = useState(true);
   const [utcNow, setUtcNow] = useState(() => new Date());
+  const previousPricesRef = useRef<Record<string, number>>({});
 
   useEffect(() => {
     fetchQuotes();
     fetchTrades();
     fetchCalendar();
+    fetchMarketCandles();
     const timeTick = setInterval(() => setUtcNow(new Date()), 1000);
     const interval = setInterval(fetchQuotes, 60000);
     return () => {
@@ -110,6 +185,17 @@ export default function OverviewPage() {
         pair,
         price: val.price,
       }));
+
+      const nextPrices: Record<string, number> = {};
+      const nextChanges: Record<string, number> = {};
+      formatted.forEach((quote) => {
+        const price = Number(quote.price);
+        const previousPrice = previousPricesRef.current[quote.pair];
+        if (previousPrice) nextChanges[quote.pair] = price - previousPrice;
+        nextPrices[quote.pair] = price;
+      });
+      previousPricesRef.current = nextPrices;
+      setQuoteChanges(nextChanges);
       setQuotes(formatted);
     } catch (error) {
       console.error("Failed to fetch quotes:", error);
@@ -137,6 +223,16 @@ export default function OverviewPage() {
       setEvents(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error("Failed to fetch calendar:", error);
+    }
+  };
+
+  const fetchMarketCandles = async () => {
+    try {
+      const res = await fetch("/api/market/timeseries?symbol=EUR/USD&interval=1h");
+      const data = await res.json();
+      setMarketCandles(Array.isArray(data.values) ? data.values : []);
+    } catch (error) {
+      console.error("Failed to fetch market candles:", error);
     }
   };
 
@@ -174,18 +270,44 @@ export default function OverviewPage() {
   const highImpactToday = events.filter(
     (event) => event.date === utcDateKey && event.impact === "High",
   );
-  const marketStatus =
-    openSessions.length > 0
-      ? `${openSessions.map((block) => block.name).join(" + ")} open`
-      : "Market quiet";
   const dynamicAlerts = [
     ...highImpactToday.map((event) => `${event.country} ${event.title}`),
-    ...(openTrades.length > 0 ? [`${openTrades.length} open trade${openTrades.length === 1 ? "" : "s"}`] : []),
+    ...(openTrades.length > 0
+      ? [`${openTrades.length} open trade${openTrades.length === 1 ? "" : "s"}`]
+      : []),
     ...(!quotesLoading && quotes.length === 0 ? ["Market feed unavailable"] : []),
   ];
   const notificationCount = dynamicAlerts.length;
   const notificationLabel =
-    dynamicAlerts[0] || (quotesLoading || tradesLoading ? "Checking alerts" : "No active alerts");
+    dynamicAlerts[0] ||
+    (quotesLoading || tradesLoading ? "Checking alerts" : "No active alerts");
+  const forexMarketState = getForexMarketState(utcNow);
+  const atrPercent = calculateAtrPercent(marketCandles);
+  const volatility = getVolatilityLevel(atrPercent);
+  const riskSentiment = getRiskSentiment(quoteChanges);
+  const marketCards = [
+    {
+      label: "Forex Market",
+      value: forexMarketState,
+      detail: forexMarketState === "Open" ? "24/5 liquidity" : "Weekend pause",
+    },
+    {
+      label: "Active Session",
+      value:
+        openSessions.length > 1 ? overlapText : currentSession?.name || "Closed",
+      detail: currentSessionRemaining,
+    },
+    {
+      label: "Volatility",
+      value: volatility.label,
+      detail: volatility.detail,
+    },
+    {
+      label: "Risk Sentiment",
+      value: riskSentiment.label,
+      detail: riskSentiment.detail,
+    },
+  ];
 
   return (
     <div className="space-y-8">
@@ -199,37 +321,75 @@ export default function OverviewPage() {
 
         <div className="hidden h-5 w-px bg-gray-800 sm:block" />
 
-        <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2 text-xs">
-          <div className="flex items-center gap-1.5 rounded-md border border-gray-800 bg-gray-900/70 px-2 py-1 text-gray-300">
-            <span className="h-1.5 w-1.5 rounded-full bg-[var(--accent)]" />
-            <span className="truncate">{marketStatus}</span>
-          </div>
-          <div className="rounded-md border border-gray-800 bg-gray-900/70 px-2 py-1 text-gray-400">
-            {overlapText}
-          </div>
-          <div className="flex items-center gap-1.5 rounded-md border border-gray-800 bg-gray-900/70 px-2 py-1 text-gray-400">
-            <Clock3 className="h-3.5 w-3.5" />
-            <span>{utcTimeLabel}</span>
-            <span className="text-gray-600">{utcDayLabel}</span>
-          </div>
-          <div className="rounded-md border border-gray-800 bg-gray-900/70 px-2 py-1 text-gray-500">
-            {currentSessionRemaining}
-          </div>
+        <div className="flex min-w-0 flex-1 flex-wrap items-center justify-center gap-2 text-xs">
+          {FOREX_SESSIONS.map((block) => {
+            const isOpen = sessionIsOpen(utcHour, block.start, block.end);
+            return (
+              <div
+                key={block.name}
+                className={`flex items-center gap-1.5 rounded-md border px-2 py-1 ${
+                  isOpen
+                    ? "border-[var(--border-soft)] bg-[var(--accent-soft)] text-gray-200"
+                    : "border-gray-800 bg-gray-900/70 text-gray-500"
+                }`}
+              >
+                <span
+                  className={`h-1.5 w-1.5 rounded-full ${
+                    isOpen ? "bg-[var(--accent)]" : "bg-gray-700"
+                  }`}
+                />
+                {block.name}
+              </div>
+            );
+          })}
         </div>
 
-        <button
-          type="button"
-          aria-label={notificationLabel}
-          title={notificationLabel}
-          className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-gray-800 text-gray-400 transition hover:border-gray-700 hover:text-white"
-        >
-          <Bell className="h-4 w-4" />
-          {notificationCount > 0 && (
-            <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-[var(--accent)] px-1 text-[10px] font-bold text-gray-950">
-              {notificationCount}
+        <div className="flex items-center gap-2">
+          <div className="flex flex-col items-end rounded-md border border-gray-800 bg-gray-900/70 px-2 py-1 text-xs">
+            <div className="flex items-center gap-1.5 text-gray-300">
+              <Clock3 className="h-3.5 w-3.5" />
+              <span>{utcTimeLabel}</span>
+              <span className="text-gray-600">{utcDayLabel}</span>
+            </div>
+            <span className="mt-0.5 text-[11px] text-gray-500">
+              {currentSessionRemaining}
             </span>
-          )}
-        </button>
+          </div>
+
+          <button
+            type="button"
+            aria-label={notificationLabel}
+            title={notificationLabel}
+            className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-gray-800 text-gray-400 transition hover:border-gray-700 hover:text-white"
+          >
+            <Bell className="h-4 w-4" />
+            {notificationCount > 0 && (
+              <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-[var(--accent)] px-1 text-[10px] font-bold text-gray-950">
+                {notificationCount}
+              </span>
+            )}
+          </button>
+        </div>
+      </div>
+
+      {/* Market Status */}
+      <div className="grid grid-cols-2 gap-3 rounded-lg border border-gray-800 bg-gray-950/40 p-3 lg:grid-cols-4">
+        {marketCards.map((card) => (
+          <div
+            key={card.label}
+            className="rounded-md border border-gray-800 bg-gray-900/70 px-3 py-2"
+          >
+            <p className="text-[11px] uppercase tracking-wide text-gray-500">
+              {card.label}
+            </p>
+            <p className="mt-1 truncate text-sm font-semibold text-white">
+              {card.value}
+            </p>
+            <p className="mt-0.5 truncate text-xs text-gray-500">
+              {card.detail}
+            </p>
+          </div>
+        ))}
       </div>
 
       {/* Stats */}
