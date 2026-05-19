@@ -472,11 +472,29 @@ export default function OverviewPage() {
     currencyStrength.map((currency) => [currency.code, currency.strength]),
   );
   const heatmapRows = HEATMAP_CURRENCIES.map((base) =>
-    HEATMAP_CURRENCIES.filter((quote) => quote.code !== base.code).map((quote) => ({
+    HEATMAP_CURRENCIES.map((quote) => ({
       label: `${base.code}/${quote.code}`,
+      base,
+      quote,
       value: (strengthByCurrency[base.code] || 0) - (strengthByCurrency[quote.code] || 0),
     })),
   );
+  const heatmapValues = heatmapRows
+    .flat()
+    .filter((cell) => cell.base.code !== cell.quote.code)
+    .map((cell) => Math.abs(cell.value));
+  const heatmapScore =
+    heatmapValues.length > 0
+      ? clamp(
+          (heatmapValues.reduce((sum, value) => sum + value, 0) /
+            heatmapValues.length) *
+            2200,
+          0,
+          100,
+        )
+      : 0;
+  const heatmapStrengthLabel =
+    heatmapScore >= 62 ? "Strong" : heatmapScore >= 28 ? "Neutral" : "Weak";
   const upcomingEvents = events
     .map((event) => ({ ...event, eventDate: parseCalendarDate(event) }))
     .filter((event) => event.eventDate.getTime() >= utcNow.getTime())
@@ -689,46 +707,54 @@ export default function OverviewPage() {
       </div>
 
       {/* Market Monitoring */}
-      <div className="grid gap-3 xl:grid-cols-[1.35fr_0.9fr_0.95fr]">
-        <section className="rounded-lg border border-gray-800 bg-gray-950/40">
+      <div className="grid items-stretch gap-3 xl:grid-cols-12">
+        <section className="min-w-0 rounded-lg border border-gray-800 bg-gray-950/40 xl:col-span-6">
           <div className="flex items-center justify-between border-b border-gray-800 px-3 py-2">
             <h2 className="text-xs font-semibold uppercase tracking-wide text-gray-400">
               Major Currency Pairs
             </h2>
             <span className="text-[11px] text-gray-600">Live monitor</span>
           </div>
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[640px] text-left text-xs">
+          <div className="overflow-hidden">
+            <table className="w-full table-fixed text-left text-xs">
               <thead className="text-[10px] uppercase tracking-wide text-gray-600">
                 <tr className="border-b border-gray-800">
-                  <th className="px-3 py-2 font-medium">Pair</th>
-                  <th className="px-3 py-2 font-medium">Price</th>
-                  <th className="px-3 py-2 font-medium">Change</th>
-                  <th className="px-3 py-2 font-medium">Spread</th>
-                  <th className="px-3 py-2 font-medium">Trend</th>
-                  <th className="px-3 py-2 font-medium">Signal</th>
-                  <th className="px-3 py-2 font-medium">Spark</th>
+                  <th className="w-[18%] px-2 py-2 font-medium">Pair</th>
+                  <th className="w-[20%] px-2 py-2 font-medium">Price</th>
+                  <th className="w-[16%] px-2 py-2 font-medium">Change</th>
+                  <th className="hidden w-[15%] px-2 py-2 font-medium 2xl:table-cell">
+                    Spread
+                  </th>
+                  <th className="hidden w-[12%] px-2 py-2 font-medium 2xl:table-cell">
+                    Trend
+                  </th>
+                  <th className="w-[14%] px-2 py-2 font-medium">Signal</th>
+                  <th className="w-[18%] px-2 py-2 font-medium">Spark</th>
                 </tr>
               </thead>
               <tbody>
                 {majorPairRows.map((row) => (
                   <tr key={row.pair} className="border-b border-gray-900 last:border-0">
-                    <td className="px-3 py-2 font-medium text-white">{row.pair}</td>
-                    <td className="px-3 py-2 font-mono text-gray-300">
+                    <td className="truncate px-2 py-2 font-medium text-white">{row.pair}</td>
+                    <td className="truncate px-2 py-2 font-mono text-gray-300">
                       {row.price ? Number(row.price).toFixed(row.pair.includes("JPY") ? 3 : 5) : "..."}
                     </td>
                     <td
-                      className={`px-3 py-2 font-mono ${
+                      className={`truncate px-2 py-2 font-mono ${
                         row.change >= 0 ? "text-[var(--accent)]" : "text-red-400"
                       }`}
                     >
                       {row.change >= 0 ? "+" : ""}
                       {row.change.toFixed(3)}%
                     </td>
-                    <td className="px-3 py-2 text-gray-500">{row.spread}</td>
-                    <td className="px-3 py-2 text-gray-400">{row.trend}</td>
+                    <td className="hidden px-2 py-2 text-gray-500 2xl:table-cell">
+                      {row.spread}
+                    </td>
+                    <td className="hidden px-2 py-2 text-gray-400 2xl:table-cell">
+                      {row.trend}
+                    </td>
                     <td
-                      className={`px-3 py-2 font-semibold ${
+                      className={`px-2 py-2 font-semibold ${
                         row.signal === "Sell"
                           ? "text-red-400"
                           : row.signal === "Buy"
@@ -738,8 +764,8 @@ export default function OverviewPage() {
                     >
                       {row.signal}
                     </td>
-                    <td className="px-3 py-2">
-                      <svg className="h-6 w-20" viewBox="0 0 72 24" aria-hidden="true">
+                    <td className="px-2 py-2">
+                      <svg className="h-6 w-full" viewBox="0 0 72 24" aria-hidden="true">
                         {row.sparkline ? (
                           <polyline
                             fill="none"
@@ -761,43 +787,71 @@ export default function OverviewPage() {
           </div>
         </section>
 
-        <section className="rounded-lg border border-gray-800 bg-gray-950/40 p-3">
+        <section className="min-w-0 rounded-lg border border-gray-800 bg-gray-950/40 p-3 xl:col-span-3">
           <div className="flex items-center justify-between">
             <h2 className="text-xs font-semibold uppercase tracking-wide text-gray-400">
               Currency Heatmap
             </h2>
-            <span className="text-[11px] text-gray-600">Strong vs weak</span>
+            <span className="text-[11px] text-gray-600">{heatmapStrengthLabel}</span>
           </div>
-          <div className="mt-3 grid grid-cols-4 gap-1">
-            {heatmapRows.flat().map((cell) => {
-              const isStrong = cell.value >= 0;
-              const intensity = clamp(Math.abs(cell.value) * 2200, 8, 90);
-              return (
-                <div
-                  key={cell.label}
-                  className={`rounded-md border px-2 py-2 text-center ${
-                    isStrong
-                      ? "border-[var(--border-soft)] text-[var(--accent)]"
-                      : "border-red-400/20 text-red-400"
-                  }`}
-                  style={{
-                    backgroundColor: isStrong
-                      ? `rgb(207 204 209 / ${intensity / 100})`
-                      : `rgb(248 113 113 / ${intensity / 100})`,
-                  }}
-                >
-                  <p className="text-[10px] font-semibold">{cell.label}</p>
-                  <p className="mt-0.5 text-[10px]">
-                    {cell.value >= 0 ? "+" : ""}
-                    {cell.value.toFixed(3)}%
-                  </p>
+          <div className="mt-3 grid grid-cols-[1.35rem_repeat(5,minmax(0,1fr))] gap-1 text-[10px]">
+            <div />
+            {HEATMAP_CURRENCIES.map((currency) => (
+              <div key={currency.code} className="text-center text-gray-500">
+                {currency.code}
+              </div>
+            ))}
+            {heatmapRows.map((row, rowIndex) => (
+              <div key={HEATMAP_CURRENCIES[rowIndex].code} className="contents">
+                <div className="flex items-center justify-center text-gray-500">
+                  {HEATMAP_CURRENCIES[rowIndex].code}
                 </div>
-              );
-            })}
+                {row.map((cell) => {
+                  const isSelf = cell.base.code === cell.quote.code;
+                  const isStrong = cell.value >= 0;
+                  const intensity = clamp(Math.abs(cell.value) * 2200, 10, 82);
+                  return (
+                    <div
+                      key={cell.label}
+                      className={`flex h-9 items-center justify-center rounded border text-[9px] font-semibold ${
+                        isSelf
+                          ? "border-gray-800 bg-gray-900/60 text-gray-700"
+                          : isStrong
+                            ? "border-[var(--border-soft)] text-gray-950"
+                            : "border-red-400/20 text-red-100"
+                      }`}
+                      title={`${cell.label}: ${cell.value >= 0 ? "+" : ""}${cell.value.toFixed(3)}%`}
+                      style={{
+                        backgroundColor: isSelf
+                          ? undefined
+                          : isStrong
+                            ? `rgb(207 204 209 / ${intensity / 100})`
+                            : `rgb(248 113 113 / ${intensity / 100})`,
+                      }}
+                    >
+                      {isSelf ? "-" : `${cell.value >= 0 ? "+" : ""}${cell.value.toFixed(2)}`}
+                    </div>
+                  );
+                })}
+              </div>
+            ))}
+          </div>
+          <div className="mt-3">
+            <div className="flex items-center justify-between text-[10px] uppercase tracking-wide text-gray-600">
+              <span>Weak</span>
+              <span>{Math.round(heatmapScore)}%</span>
+              <span>Strong</span>
+            </div>
+            <div className="mt-1 h-1.5 rounded-full bg-gradient-to-r from-red-400 via-gray-700 to-[var(--accent)]">
+              <div
+                className="h-3 w-1 rounded-full bg-white"
+                style={{ marginLeft: `calc(${heatmapScore}% - 2px)` }}
+              />
+            </div>
           </div>
         </section>
 
-        <section className="rounded-lg border border-gray-800 bg-gray-950/40">
+        <section className="min-w-0 rounded-lg border border-gray-800 bg-gray-950/40 xl:col-span-3">
           <div className="flex items-center justify-between border-b border-gray-800 px-3 py-2">
             <h2 className="text-xs font-semibold uppercase tracking-wide text-gray-400">
               Economic Calendar
