@@ -64,6 +64,23 @@ const CURRENCY_STRENGTH: CurrencyMeta[] = [
   { code: "JPY", flag: "🇯🇵", pair: "USD/JPY", direction: "quote" },
 ];
 
+const MAJOR_PAIRS = [
+  "EUR/USD",
+  "GBP/USD",
+  "USD/JPY",
+  "USD/CHF",
+  "AUD/USD",
+  "USD/CAD",
+];
+
+const HEATMAP_CURRENCIES = [
+  { code: "USD", flag: "🇺🇸" },
+  { code: "EUR", flag: "🇪🇺" },
+  { code: "GBP", flag: "🇬🇧" },
+  { code: "JPY", flag: "🇯🇵" },
+  { code: "AUD", flag: "🇦🇺" },
+];
+
 const pad = (value: number) => value.toString().padStart(2, "0");
 
 const clamp = (value: number, min: number, max: number) => {
@@ -212,6 +229,63 @@ const getRiskSentiment = (
   };
 };
 
+const getPairSignal = (change: number) => {
+  if (change > 0.01) return "Buy";
+  if (change < -0.01) return "Sell";
+  return "Hold";
+};
+
+const getPairTrend = (change: number) => {
+  if (change > 0.01) return "Up";
+  if (change < -0.01) return "Down";
+  return "Flat";
+};
+
+const getIndicativeSpread = (price: string) => {
+  const numericPrice = Number(price);
+  if (!numericPrice) return "N/A";
+  const pipSize = numericPrice > 20 ? 0.01 : 0.0001;
+  return `${(pipSize / numericPrice * 10000).toFixed(1)} pips`;
+};
+
+const getSparklinePoints = (candles: Candle[]) => {
+  const closes = candles
+    .slice(0, 16)
+    .reverse()
+    .map((candle) => Number(candle.close))
+    .filter(Boolean);
+  if (closes.length < 2) return "";
+
+  const min = Math.min(...closes);
+  const max = Math.max(...closes);
+  const range = max - min || 1;
+
+  return closes
+    .map((close, index) => {
+      const x = (index / (closes.length - 1)) * 72;
+      const y = 24 - ((close - min) / range) * 22;
+      return `${x.toFixed(1)},${y.toFixed(1)}`;
+    })
+    .join(" ");
+};
+
+const parseCalendarDate = (event: CalendarEvent) => {
+  const dateText = `${event.date} ${event.time || "00:00"}`;
+  const parsed = new Date(dateText);
+  return Number.isNaN(parsed.getTime()) ? new Date(event.date) : parsed;
+};
+
+const formatCountdown = (target: Date, now: Date) => {
+  const diff = target.getTime() - now.getTime();
+  if (diff <= 0) return "Now";
+  const totalMinutes = Math.floor(diff / 60000);
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  if (hours >= 24) return `${Math.floor(hours / 24)}d ${hours % 24}h`;
+  if (hours > 0) return `${hours}h ${minutes}m`;
+  return `${minutes}m`;
+};
+
 export default function OverviewPage() {
   const { data: session } = useSession();
   const [quotes, setQuotes] = useState<Quote[]>([]);
@@ -219,6 +293,7 @@ export default function OverviewPage() {
   const [trades, setTrades] = useState<Trade[]>([]);
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [marketCandles, setMarketCandles] = useState<Candle[]>([]);
+  const [pairCandles, setPairCandles] = useState<Record<string, Candle[]>>({});
   const [quotesLoading, setQuotesLoading] = useState(true);
   const [tradesLoading, setTradesLoading] = useState(true);
   const [utcNow, setUtcNow] = useState(() => new Date());
@@ -229,6 +304,7 @@ export default function OverviewPage() {
     fetchTrades();
     fetchCalendar();
     fetchMarketCandles();
+    fetchPairCandles();
     const timeTick = setInterval(() => setUtcNow(new Date()), 1000);
     const interval = setInterval(fetchQuotes, 60000);
     return () => {
@@ -298,6 +374,23 @@ export default function OverviewPage() {
     }
   };
 
+  const fetchPairCandles = async () => {
+    try {
+      const entries = await Promise.all(
+        MAJOR_PAIRS.map(async (pair) => {
+          const res = await fetch(
+            `/api/market/timeseries?symbol=${encodeURIComponent(pair)}&interval=1h`,
+          );
+          const data = await res.json();
+          return [pair, Array.isArray(data.values) ? data.values : []] as const;
+        }),
+      );
+      setPairCandles(Object.fromEntries(entries));
+    } catch (error) {
+      console.error("Failed to fetch pair candles:", error);
+    }
+  };
+
   const openTrades = trades.filter((t) => t.status === "open");
   const closedTrades = trades.filter((t) => t.status === "closed");
   const totalProfit = closedTrades.reduce((sum, t) => sum + (t.profit || 0), 0);
@@ -359,6 +452,36 @@ export default function OverviewPage() {
   const riskGaugeStyle = {
     background: `conic-gradient(var(--accent) ${riskSentiment.score * 1.8}deg, #1f2937 0deg 180deg)`,
   };
+  const quoteByPair = Object.fromEntries(
+    quotes.map((quote) => [quote.pair, quote]),
+  );
+  const majorPairRows = MAJOR_PAIRS.map((pair) => {
+    const quote = quoteByPair[pair];
+    const change = quoteChanges[pair] || 0;
+    return {
+      pair,
+      price: quote?.price || null,
+      change,
+      spread: quote ? getIndicativeSpread(quote.price) : "N/A",
+      trend: getPairTrend(change),
+      signal: getPairSignal(change),
+      sparkline: getSparklinePoints(pairCandles[pair] || []),
+    };
+  });
+  const strengthByCurrency = Object.fromEntries(
+    currencyStrength.map((currency) => [currency.code, currency.strength]),
+  );
+  const heatmapRows = HEATMAP_CURRENCIES.map((base) =>
+    HEATMAP_CURRENCIES.filter((quote) => quote.code !== base.code).map((quote) => ({
+      label: `${base.code}/${quote.code}`,
+      value: (strengthByCurrency[base.code] || 0) - (strengthByCurrency[quote.code] || 0),
+    })),
+  );
+  const upcomingEvents = events
+    .map((event) => ({ ...event, eventDate: parseCalendarDate(event) }))
+    .filter((event) => event.eventDate.getTime() >= utcNow.getTime())
+    .sort((a, b) => a.eventDate.getTime() - b.eventDate.getTime())
+    .slice(0, 4);
 
   return (
     <div className="space-y-8">
@@ -561,6 +684,166 @@ export default function OverviewPage() {
             <p className="mt-2 text-center text-xs text-gray-400">
               Investors seeking: {riskSentiment.seeking}
             </p>
+          </div>
+        </section>
+      </div>
+
+      {/* Market Monitoring */}
+      <div className="grid gap-3 xl:grid-cols-[1.35fr_0.9fr_0.95fr]">
+        <section className="rounded-lg border border-gray-800 bg-gray-950/40">
+          <div className="flex items-center justify-between border-b border-gray-800 px-3 py-2">
+            <h2 className="text-xs font-semibold uppercase tracking-wide text-gray-400">
+              Major Currency Pairs
+            </h2>
+            <span className="text-[11px] text-gray-600">Live monitor</span>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[640px] text-left text-xs">
+              <thead className="text-[10px] uppercase tracking-wide text-gray-600">
+                <tr className="border-b border-gray-800">
+                  <th className="px-3 py-2 font-medium">Pair</th>
+                  <th className="px-3 py-2 font-medium">Price</th>
+                  <th className="px-3 py-2 font-medium">Change</th>
+                  <th className="px-3 py-2 font-medium">Spread</th>
+                  <th className="px-3 py-2 font-medium">Trend</th>
+                  <th className="px-3 py-2 font-medium">Signal</th>
+                  <th className="px-3 py-2 font-medium">Spark</th>
+                </tr>
+              </thead>
+              <tbody>
+                {majorPairRows.map((row) => (
+                  <tr key={row.pair} className="border-b border-gray-900 last:border-0">
+                    <td className="px-3 py-2 font-medium text-white">{row.pair}</td>
+                    <td className="px-3 py-2 font-mono text-gray-300">
+                      {row.price ? Number(row.price).toFixed(row.pair.includes("JPY") ? 3 : 5) : "..."}
+                    </td>
+                    <td
+                      className={`px-3 py-2 font-mono ${
+                        row.change >= 0 ? "text-[var(--accent)]" : "text-red-400"
+                      }`}
+                    >
+                      {row.change >= 0 ? "+" : ""}
+                      {row.change.toFixed(3)}%
+                    </td>
+                    <td className="px-3 py-2 text-gray-500">{row.spread}</td>
+                    <td className="px-3 py-2 text-gray-400">{row.trend}</td>
+                    <td
+                      className={`px-3 py-2 font-semibold ${
+                        row.signal === "Sell"
+                          ? "text-red-400"
+                          : row.signal === "Buy"
+                            ? "text-[var(--accent)]"
+                            : "text-gray-500"
+                      }`}
+                    >
+                      {row.signal}
+                    </td>
+                    <td className="px-3 py-2">
+                      <svg className="h-6 w-20" viewBox="0 0 72 24" aria-hidden="true">
+                        {row.sparkline ? (
+                          <polyline
+                            fill="none"
+                            points={row.sparkline}
+                            stroke={row.change >= 0 ? "var(--accent)" : "#f87171"}
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        ) : (
+                          <line x1="0" x2="72" y1="12" y2="12" stroke="#374151" />
+                        )}
+                      </svg>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section className="rounded-lg border border-gray-800 bg-gray-950/40 p-3">
+          <div className="flex items-center justify-between">
+            <h2 className="text-xs font-semibold uppercase tracking-wide text-gray-400">
+              Currency Heatmap
+            </h2>
+            <span className="text-[11px] text-gray-600">Strong vs weak</span>
+          </div>
+          <div className="mt-3 grid grid-cols-4 gap-1">
+            {heatmapRows.flat().map((cell) => {
+              const isStrong = cell.value >= 0;
+              const intensity = clamp(Math.abs(cell.value) * 2200, 8, 90);
+              return (
+                <div
+                  key={cell.label}
+                  className={`rounded-md border px-2 py-2 text-center ${
+                    isStrong
+                      ? "border-[var(--border-soft)] text-[var(--accent)]"
+                      : "border-red-400/20 text-red-400"
+                  }`}
+                  style={{
+                    backgroundColor: isStrong
+                      ? `rgb(207 204 209 / ${intensity / 100})`
+                      : `rgb(248 113 113 / ${intensity / 100})`,
+                  }}
+                >
+                  <p className="text-[10px] font-semibold">{cell.label}</p>
+                  <p className="mt-0.5 text-[10px]">
+                    {cell.value >= 0 ? "+" : ""}
+                    {cell.value.toFixed(3)}%
+                  </p>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+
+        <section className="rounded-lg border border-gray-800 bg-gray-950/40">
+          <div className="flex items-center justify-between border-b border-gray-800 px-3 py-2">
+            <h2 className="text-xs font-semibold uppercase tracking-wide text-gray-400">
+              Economic Calendar
+            </h2>
+            <span className="text-[11px] text-gray-600">Countdown</span>
+          </div>
+          <div className="space-y-2 p-3">
+            {upcomingEvents.length === 0 ? (
+              <p className="py-6 text-center text-xs text-gray-600">
+                No upcoming events loaded
+              </p>
+            ) : (
+              upcomingEvents.map((event) => (
+                <div
+                  key={`${event.date}-${event.time}-${event.title}`}
+                  className="rounded-md border border-gray-800 bg-gray-900/70 px-3 py-2"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-medium text-white">
+                        {event.title}
+                      </p>
+                      <p className="mt-0.5 text-xs text-gray-500">
+                        {event.country} • {event.time || "Time pending"}
+                      </p>
+                    </div>
+                    <div className="shrink-0 text-right">
+                      <p
+                        className={`text-xs font-semibold ${
+                          event.impact === "High"
+                            ? "text-red-400"
+                            : event.impact === "Medium"
+                              ? "text-yellow-400"
+                              : "text-[var(--accent)]"
+                        }`}
+                      >
+                        {event.impact || "Event"}
+                      </p>
+                      <p className="mt-0.5 text-xs text-gray-500">
+                        {formatCountdown(event.eventDate, utcNow)}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </section>
       </div>
