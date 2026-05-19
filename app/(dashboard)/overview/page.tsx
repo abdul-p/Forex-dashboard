@@ -43,6 +43,13 @@ type SessionBlock = {
   end: number;
 };
 
+type CurrencyMeta = {
+  code: string;
+  flag: string;
+  pair: string;
+  direction: "base" | "quote";
+};
+
 const FOREX_SESSIONS: SessionBlock[] = [
   { name: "Sydney", start: 22, end: 7 },
   { name: "Tokyo", start: 0, end: 9 },
@@ -50,7 +57,18 @@ const FOREX_SESSIONS: SessionBlock[] = [
   { name: "New York", start: 13, end: 22 },
 ];
 
+const CURRENCY_STRENGTH: CurrencyMeta[] = [
+  { code: "EUR", flag: "🇪🇺", pair: "EUR/USD", direction: "base" },
+  { code: "GBP", flag: "🇬🇧", pair: "GBP/USD", direction: "base" },
+  { code: "AUD", flag: "🇦🇺", pair: "AUD/USD", direction: "base" },
+  { code: "JPY", flag: "🇯🇵", pair: "USD/JPY", direction: "quote" },
+];
+
 const pad = (value: number) => value.toString().padStart(2, "0");
+
+const clamp = (value: number, min: number, max: number) => {
+  return Math.min(Math.max(value, min), max);
+};
 
 const sessionIsOpen = (hour: number, start: number, end: number) => {
   if (start < end) return hour >= start && hour < end;
@@ -125,31 +143,73 @@ const calculateAtrPercent = (candles: Candle[]) => {
 };
 
 const getVolatilityLevel = (atrPercent: number | null) => {
-  if (atrPercent === null) return { label: "Loading", detail: "ATR pending" };
-  if (atrPercent >= 0.35) return { label: "High", detail: `${atrPercent.toFixed(2)}% ATR` };
-  if (atrPercent >= 0.18) return { label: "Moderate", detail: `${atrPercent.toFixed(2)}% ATR` };
-  return { label: "Low", detail: `${atrPercent.toFixed(2)}% ATR` };
+  if (atrPercent === null) {
+    return { label: "Loading", detail: "ATR pending", score: 0 };
+  }
+  const score = clamp((atrPercent / 0.5) * 100, 0, 100);
+  if (atrPercent >= 0.35) {
+    return { label: "High", detail: `${atrPercent.toFixed(2)}% ATR`, score };
+  }
+  if (atrPercent >= 0.18) {
+    return { label: "Moderate", detail: `${atrPercent.toFixed(2)}% ATR`, score };
+  }
+  return { label: "Low", detail: `${atrPercent.toFixed(2)}% ATR`, score };
 };
 
-const getRiskSentiment = (changes: Record<string, number>) => {
-  const hasMovement = ["AUD/USD", "GBP/USD", "USD/JPY", "USD/CHF"].some(
-    (pair) => changes[pair] !== undefined,
-  );
-  const growthCurrencies =
-    (changes["AUD/USD"] || 0) + (changes["GBP/USD"] || 0);
-  const safetyCurrencies =
-    (changes["USD/JPY"] || 0) + (changes["USD/CHF"] || 0);
+const getCurrencyStrength = (changes: Record<string, number>) => {
+  return CURRENCY_STRENGTH.map((currency) => {
+    const pairChange = changes[currency.pair] || 0;
+    const strength =
+      currency.direction === "base" ? pairChange : pairChange * -1;
+    return {
+      ...currency,
+      strength,
+      score: clamp(Math.abs(strength) * 2500, 4, 100),
+    };
+  });
+};
+
+const getRiskSentiment = (
+  changes: Record<string, number>,
+  strengths: ReturnType<typeof getCurrencyStrength>,
+) => {
+  const hasMovement = Object.keys(changes).length > 0;
+  const riskFlow =
+    (strengths.find((item) => item.code === "AUD")?.strength || 0) +
+    (strengths.find((item) => item.code === "GBP")?.strength || 0);
+  const safetyFlow = strengths.find((item) => item.code === "JPY")?.strength || 0;
+  const score = hasMovement ? clamp(50 + (riskFlow - safetyFlow) * 2000, 0, 100) : 50;
 
   if (!hasMovement) {
-    return { label: "Neutral", detail: "Waiting for price movement" };
+    return {
+      label: "Neutral",
+      detail: "Waiting for price movement",
+      seeking: "Balanced exposure",
+      score,
+    };
   }
-  if (growthCurrencies > Math.abs(safetyCurrencies)) {
-    return { label: "Risk-On", detail: "AUD/GBP bid" };
+  if (score >= 58) {
+    return {
+      label: "Risk-On",
+      detail: "AUD/GBP bid",
+      seeking: "Higher returns",
+      score,
+    };
   }
-  if (safetyCurrencies > Math.abs(growthCurrencies)) {
-    return { label: "Risk-Off", detail: "USD/JPY/CHF bid" };
+  if (score <= 42) {
+    return {
+      label: "Risk-Off",
+      detail: "JPY safety bid",
+      seeking: "Safety assets",
+      score,
+    };
   }
-  return { label: "Neutral", detail: "Mixed currency flow" };
+  return {
+    label: "Neutral",
+    detail: "Mixed currency flow",
+    seeking: "Balanced exposure",
+    score,
+  };
 };
 
 export default function OverviewPage() {
@@ -191,7 +251,9 @@ export default function OverviewPage() {
       formatted.forEach((quote) => {
         const price = Number(quote.price);
         const previousPrice = previousPricesRef.current[quote.pair];
-        if (previousPrice) nextChanges[quote.pair] = price - previousPrice;
+        if (previousPrice) {
+          nextChanges[quote.pair] = ((price - previousPrice) / previousPrice) * 100;
+        }
         nextPrices[quote.pair] = price;
       });
       previousPricesRef.current = nextPrices;
@@ -284,30 +346,19 @@ export default function OverviewPage() {
   const forexMarketState = getForexMarketState(utcNow);
   const atrPercent = calculateAtrPercent(marketCandles);
   const volatility = getVolatilityLevel(atrPercent);
-  const riskSentiment = getRiskSentiment(quoteChanges);
-  const marketCards = [
-    {
-      label: "Forex Market",
-      value: forexMarketState,
-      detail: forexMarketState === "Open" ? "24/5 liquidity" : "Weekend pause",
-    },
-    {
-      label: "Active Session",
-      value:
-        openSessions.length > 1 ? overlapText : currentSession?.name || "Closed",
-      detail: currentSessionRemaining,
-    },
-    {
-      label: "Volatility",
-      value: volatility.label,
-      detail: volatility.detail,
-    },
-    {
-      label: "Risk Sentiment",
-      value: riskSentiment.label,
-      detail: riskSentiment.detail,
-    },
-  ];
+  const currencyStrength = getCurrencyStrength(quoteChanges);
+  const riskSentiment = getRiskSentiment(quoteChanges, currencyStrength);
+  const activeSession = openSessions.length > 1
+    ? overlapText
+    : currentSession?.name || "Closed";
+  const volatilityTextColor =
+    volatility.label === "High" ? "text-red-400" : "text-white";
+  const volatilityMeterStyle = {
+    width: `${volatility.score}%`,
+  };
+  const riskGaugeStyle = {
+    background: `conic-gradient(var(--accent) ${riskSentiment.score * 1.8}deg, #1f2937 0deg 180deg)`,
+  };
 
   return (
     <div className="space-y-8">
@@ -373,23 +424,145 @@ export default function OverviewPage() {
       </div>
 
       {/* Market Status */}
-      <div className="grid grid-cols-2 gap-3 rounded-lg border border-gray-800 bg-gray-950/40 p-3 lg:grid-cols-4">
-        {marketCards.map((card) => (
-          <div
-            key={card.label}
-            className="rounded-md border border-gray-800 bg-gray-900/70 px-3 py-2"
-          >
-            <p className="text-[11px] uppercase tracking-wide text-gray-500">
-              {card.label}
-            </p>
-            <p className="mt-1 truncate text-sm font-semibold text-white">
-              {card.value}
-            </p>
-            <p className="mt-0.5 truncate text-xs text-gray-500">
-              {card.detail}
+      <div className="grid gap-3 lg:grid-cols-4">
+        <section className="rounded-lg border border-gray-800 bg-gray-950/40">
+          <div className="border-b border-gray-800 px-3 py-2">
+            <h2 className="text-xs font-semibold uppercase tracking-wide text-gray-400">
+              Market Status
+            </h2>
+          </div>
+          <div className="grid grid-cols-2 gap-3 p-3">
+            <div>
+              <p className="text-[11px] uppercase tracking-wide text-gray-500">
+                Forex Market
+              </p>
+              <p className="mt-1 text-sm font-semibold text-white">
+                {forexMarketState}
+              </p>
+            </div>
+            <div>
+              <p className="text-[11px] uppercase tracking-wide text-gray-500">
+                Session
+              </p>
+              <p className="mt-1 truncate text-sm font-semibold text-white">
+                {activeSession}
+              </p>
+            </div>
+            <div>
+              <p className="text-[11px] uppercase tracking-wide text-gray-500">
+                Volatility
+              </p>
+              <p className={`mt-1 text-sm font-semibold ${volatilityTextColor}`}>
+                {volatility.label}
+              </p>
+            </div>
+            <div>
+              <p className="text-[11px] uppercase tracking-wide text-gray-500">
+                ATR Score
+              </p>
+              <p className={`mt-1 text-sm font-semibold ${volatilityTextColor}`}>
+                {volatility.detail}
+              </p>
+            </div>
+            <div className="col-span-2">
+              <p className="text-[11px] uppercase tracking-wide text-gray-500">
+                Risk Sentiment
+              </p>
+              <p className="mt-1 text-sm font-semibold text-white">
+                {riskSentiment.label}
+              </p>
+              <p className="mt-0.5 text-xs text-gray-500">
+                {riskSentiment.detail}
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section className="rounded-lg border border-gray-800 bg-gray-950/40 p-3">
+          <h2 className="text-xs font-semibold uppercase tracking-wide text-gray-400">
+            Currency Strength vs USD
+          </h2>
+          <div className="mt-3 space-y-3">
+            {currencyStrength.map((currency) => (
+              <div key={currency.code}>
+                <div className="flex items-center justify-between gap-2 text-xs">
+                  <div className="flex items-center gap-2 text-gray-300">
+                    <span className="text-sm">{currency.flag}</span>
+                    <span className="font-medium">{currency.code}</span>
+                  </div>
+                  <span
+                    className={
+                      currency.strength >= 0 ? "text-[var(--accent)]" : "text-red-400"
+                    }
+                  >
+                    {currency.strength >= 0 ? "+" : ""}
+                    {currency.strength.toFixed(3)}%
+                  </span>
+                </div>
+                <div className="mt-1 h-1.5 rounded-full bg-gray-800">
+                  <div
+                    className={`h-full rounded-full ${
+                      currency.strength >= 0 ? "bg-[var(--accent)]" : "bg-red-400"
+                    }`}
+                    style={{ width: `${currency.score}%` }}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="rounded-lg border border-gray-800 bg-gray-950/40 p-3">
+          <h2 className="text-xs font-semibold uppercase tracking-wide text-gray-400">
+            Volatility Index
+          </h2>
+          <div className="mt-4">
+            <div className="flex items-end justify-between">
+              <p className={`text-2xl font-semibold ${volatilityTextColor}`}>
+                {volatility.label}
+              </p>
+              <p className="text-xs text-gray-500">{volatility.detail}</p>
+            </div>
+            <div className="mt-4 h-2 rounded-full bg-gray-800">
+              <div
+                className={`h-full rounded-full ${
+                  volatility.label === "High" ? "bg-red-400" : "bg-[var(--accent)]"
+                }`}
+                style={volatilityMeterStyle}
+              />
+            </div>
+            <div className="mt-2 flex justify-between text-[10px] uppercase tracking-wide text-gray-600">
+              <span>Low</span>
+              <span>High</span>
+            </div>
+          </div>
+        </section>
+
+        <section className="rounded-lg border border-gray-800 bg-gray-950/40 p-3">
+          <h2 className="text-xs font-semibold uppercase tracking-wide text-gray-400">
+            Global Risk Sentiment
+          </h2>
+          <div className="mt-3 flex flex-col items-center">
+            <div className="relative h-20 w-36 overflow-hidden">
+              <div
+                className="absolute inset-x-0 top-0 h-36 rounded-full"
+                style={riskGaugeStyle}
+              />
+              <div className="absolute inset-x-4 top-4 h-28 rounded-full bg-gray-950" />
+              <div className="absolute inset-x-0 bottom-0 text-center">
+                <p className="text-lg font-semibold text-white">
+                  {riskSentiment.label}
+                </p>
+                <p className="text-xs text-gray-500">
+                  {Math.round(riskSentiment.score)} / 100
+                </p>
+              </div>
+            </div>
+            <p className="mt-2 text-center text-xs text-gray-400">
+              Investors seeking: {riskSentiment.seeking}
             </p>
           </div>
-        ))}
+        </section>
       </div>
 
       {/* Stats */}
