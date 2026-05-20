@@ -1303,7 +1303,7 @@ export default function OverviewPage() {
         </div>
 
         {/* Recent Trades */}
-        <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
+        {/* <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-white font-semibold">Recent Trades</h2>
             <Link
@@ -1374,7 +1374,7 @@ export default function OverviewPage() {
               ))}
             </div>
           )}
-        </div>
+        </div> */}
       </div>
     </div>
   );
