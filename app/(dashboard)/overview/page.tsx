@@ -98,7 +98,12 @@ const sessionIsOpen = (hour: number, start: number, end: number) => {
   return hour >= start || hour < end;
 };
 
-const sessionRemaining = (hour: number, minute: number, start: number, end: number) => {
+const sessionRemaining = (
+  hour: number,
+  minute: number,
+  start: number,
+  end: number,
+) => {
   const currentMinutes = hour * 60 + minute;
   let endMinutes = end * 60;
   if (start >= end && currentMinutes >= start * 60) {
@@ -174,7 +179,11 @@ const getVolatilityLevel = (atrPercent: number | null) => {
     return { label: "High", detail: `${atrPercent.toFixed(2)}% ATR`, score };
   }
   if (atrPercent >= 0.18) {
-    return { label: "Moderate", detail: `${atrPercent.toFixed(2)}% ATR`, score };
+    return {
+      label: "Moderate",
+      detail: `${atrPercent.toFixed(2)}% ATR`,
+      score,
+    };
   }
   return { label: "Low", detail: `${atrPercent.toFixed(2)}% ATR`, score };
 };
@@ -200,8 +209,11 @@ const getRiskSentiment = (
   const riskFlow =
     (strengths.find((item) => item.code === "AUD")?.strength || 0) +
     (strengths.find((item) => item.code === "GBP")?.strength || 0);
-  const safetyFlow = strengths.find((item) => item.code === "JPY")?.strength || 0;
-  const score = hasMovement ? clamp(50 + (riskFlow - safetyFlow) * 2000, 0, 100) : 50;
+  const safetyFlow =
+    strengths.find((item) => item.code === "JPY")?.strength || 0;
+  const score = hasMovement
+    ? clamp(50 + (riskFlow - safetyFlow) * 2000, 0, 100)
+    : 50;
 
   if (!hasMovement) {
     return {
@@ -251,7 +263,7 @@ const getIndicativeSpread = (price: string) => {
   const numericPrice = Number(price);
   if (!numericPrice) return "N/A";
   const pipSize = numericPrice > 20 ? 0.01 : 0.0001;
-  return `${(pipSize / numericPrice * 10000).toFixed(1)} pips`;
+  return `${((pipSize / numericPrice) * 10000).toFixed(1)} pips`;
 };
 
 const getSparklinePoints = (candles: Candle[]) => {
@@ -294,8 +306,28 @@ const formatCountdown = (target: Date, now: Date) => {
 
 const analyzeHeadlineSentiment = (headline: string) => {
   const text = headline.toLowerCase();
-  const positiveTerms = ["positive", "bull", "gain", "rally", "strong", "surge", "beat", "up"];
-  const negativeTerms = ["negative", "bear", "loss", "drop", "weak", "slump", "miss", "fall", "sell", "risk"];
+  const positiveTerms = [
+    "positive",
+    "bull",
+    "gain",
+    "rally",
+    "strong",
+    "surge",
+    "beat",
+    "up",
+  ];
+  const negativeTerms = [
+    "negative",
+    "bear",
+    "loss",
+    "drop",
+    "weak",
+    "slump",
+    "miss",
+    "fall",
+    "sell",
+    "risk",
+  ];
   const score =
     positiveTerms.filter((term) => text.includes(term)).length -
     negativeTerms.filter((term) => text.includes(term)).length;
@@ -320,7 +352,8 @@ const buildRetailPositioningText = (eurusdChange: number) => {
   if (eurusdChange >= 0.15) {
     return {
       label: "78% LONG EUR/USD",
-      detail: "Retail momentum is bullish; watch reversal risk near resistance.",
+      detail:
+        "Retail momentum is bullish; watch reversal risk near resistance.",
     };
   }
   if (eurusdChange <= -0.15) {
@@ -350,21 +383,6 @@ export default function OverviewPage() {
   const [utcNow, setUtcNow] = useState(() => new Date());
   const previousPricesRef = useRef<Record<string, number>>({});
 
-  useEffect(() => {
-    fetchQuotes();
-    fetchTrades();
-    fetchCalendar();
-    fetchMarketCandles();
-    fetchPairCandles();
-    fetchNews();
-    const timeTick = setInterval(() => setUtcNow(new Date()), 1000);
-    const interval = setInterval(fetchQuotes, 60000);
-    return () => {
-      clearInterval(interval);
-      clearInterval(timeTick);
-    };
-  }, []);
-
   const fetchQuotes = async () => {
     try {
       const res = await fetch("/api/market");
@@ -380,7 +398,8 @@ export default function OverviewPage() {
         const price = Number(quote.price);
         const previousPrice = previousPricesRef.current[quote.pair];
         if (previousPrice) {
-          nextChanges[quote.pair] = ((price - previousPrice) / previousPrice) * 100;
+          nextChanges[quote.pair] =
+            ((price - previousPrice) / previousPrice) * 100;
         }
         nextPrices[quote.pair] = price;
       });
@@ -418,7 +437,9 @@ export default function OverviewPage() {
 
   const fetchMarketCandles = async () => {
     try {
-      const res = await fetch("/api/market/timeseries?symbol=EUR/USD&interval=1h");
+      const res = await fetch(
+        "/api/market/timeseries?symbol=EUR/USD&interval=1h",
+      );
       const data = await res.json();
       setMarketCandles(Array.isArray(data.values) ? data.values : []);
     } catch (error) {
@@ -462,6 +483,21 @@ export default function OverviewPage() {
     }
   };
 
+  useEffect(() => {
+    fetchQuotes();
+    fetchTrades();
+    fetchCalendar();
+    fetchMarketCandles();
+    fetchPairCandles();
+    fetchNews();
+    const timeTick = setInterval(() => setUtcNow(new Date()), 1000);
+    const interval = setInterval(fetchQuotes, 60000);
+    return () => {
+      clearInterval(interval);
+      clearInterval(timeTick);
+    };
+  }, []);
+
   const openTrades = trades.filter((t) => t.status === "open");
   const closedTrades = trades.filter((t) => t.status === "closed");
   const totalProfit = closedTrades.reduce((sum, t) => sum + (t.profit || 0), 0);
@@ -485,11 +521,15 @@ export default function OverviewPage() {
     sessionIsOpen(utcHour, block.start, block.end),
   );
   const currentSession =
-    openSessions.find((block) => block.name === "London") ||
-    openSessions[0];
+    openSessions.find((block) => block.name === "London") || openSessions[0];
   const currentSessionRemaining = currentSession
     ? formatRemaining(
-        sessionRemaining(utcHour, utcMinute, currentSession.start, currentSession.end),
+        sessionRemaining(
+          utcHour,
+          utcMinute,
+          currentSession.start,
+          currentSession.end,
+        ),
       )
     : "Session closed";
   const overlapText = overlapLabel(openSessions.map((block) => block.name));
@@ -501,7 +541,9 @@ export default function OverviewPage() {
     ...(openTrades.length > 0
       ? [`${openTrades.length} open trade${openTrades.length === 1 ? "" : "s"}`]
       : []),
-    ...(!quotesLoading && quotes.length === 0 ? ["Market feed unavailable"] : []),
+    ...(!quotesLoading && quotes.length === 0
+      ? ["Market feed unavailable"]
+      : []),
   ];
   const notificationCount = dynamicAlerts.length;
   const notificationLabel =
@@ -512,9 +554,8 @@ export default function OverviewPage() {
   const volatility = getVolatilityLevel(atrPercent);
   const currencyStrength = getCurrencyStrength(quoteChanges);
   const riskSentiment = getRiskSentiment(quoteChanges, currencyStrength);
-  const activeSession = openSessions.length > 1
-    ? overlapText
-    : currentSession?.name || "Closed";
+  const activeSession =
+    openSessions.length > 1 ? overlapText : currentSession?.name || "Closed";
   const volatilityTextColor =
     volatility.label === "High" ? "text-red-400" : "text-white";
   const volatilityMeterStyle = {
@@ -547,7 +588,9 @@ export default function OverviewPage() {
       label: `${base.code}/${quote.code}`,
       base,
       quote,
-      value: (strengthByCurrency[base.code] || 0) - (strengthByCurrency[quote.code] || 0),
+      value:
+        (strengthByCurrency[base.code] || 0) -
+        (strengthByCurrency[quote.code] || 0),
     })),
   );
   const heatmapValues = heatmapRows
@@ -572,19 +615,24 @@ export default function OverviewPage() {
     .sort((a, b) => a.eventDate.getTime() - b.eventDate.getTime())
     .slice(0, 4);
 
-  const nextHighImpactEvent = upcomingEvents.find((event) => event.impact === "High");
+  const nextHighImpactEvent = upcomingEvents.find(
+    (event) => event.impact === "High",
+  );
   const nextHighImpactCountdown = nextHighImpactEvent
     ? formatCountdown(nextHighImpactEvent.eventDate, utcNow)
     : null;
   const newsSentiment = deriveNewsSentimentLabel(newsItems);
-  const retailPositioning = buildRetailPositioningText(quoteChanges["EUR/USD"] || 0);
+  const retailPositioning = buildRetailPositioningText(
+    quoteChanges["EUR/USD"] || 0,
+  );
   const floatingPnl = openTrades.reduce((sum, trade) => {
     const quote = quoteByPair[trade.pair];
     if (!quote) return sum;
     const currentPrice = Number(quote.price);
-    const delta = trade.type === "buy"
-      ? currentPrice - trade.entryPrice
-      : trade.entryPrice - currentPrice;
+    const delta =
+      trade.type === "buy"
+        ? currentPrice - trade.entryPrice
+        : trade.entryPrice - currentPrice;
     return sum + delta * trade.lotSize * 1000;
   }, 0);
   const accountBalance = session?.user.balance || 0;
@@ -593,22 +641,25 @@ export default function OverviewPage() {
     (sum, trade) => sum + Math.abs(trade.entryPrice * trade.lotSize * 1000),
     0,
   );
-  const marginUsage = accountBalance > 0
-    ? clamp((exposureNotional / accountBalance) * 4, 0, 100)
-    : 0;
+  const marginUsage =
+    accountBalance > 0
+      ? clamp((exposureNotional / accountBalance) * 4, 0, 100)
+      : 0;
   const usdExposure = openTrades.reduce((sum, trade) => {
     if (trade.pair.includes("USD/") || trade.pair.includes("/USD")) {
       return sum + Math.abs(trade.entryPrice * trade.lotSize * 1000);
     }
     return sum;
   }, 0);
-  const usdExposurePercent = exposureNotional > 0
-    ? clamp((usdExposure / exposureNotional) * 100, 0, 100)
-    : 0;
+  const usdExposurePercent =
+    exposureNotional > 0
+      ? clamp((usdExposure / exposureNotional) * 100, 0, 100)
+      : 0;
   const peakEquity = Math.max(accountBalance, equity);
-  const drawdownPercent = peakEquity > 0
-    ? Math.max(0, ((peakEquity - equity) / peakEquity) * 100)
-    : 0;
+  const drawdownPercent =
+    peakEquity > 0
+      ? Math.max(0, ((peakEquity - equity) / peakEquity) * 100)
+      : 0;
   const sortedByGain = majorPairRows
     .filter((row) => row.price !== null)
     .slice()
@@ -628,8 +679,8 @@ export default function OverviewPage() {
     riskSentiment.label === "Risk-On"
       ? "Risk-on mode suggests momentum trades across growth currencies."
       : riskSentiment.label === "Risk-Off"
-      ? "Risk-off mode favors safe-haven flows and defensive positions."
-      : "Mixed market sentiment; look for confirmation before committing.",
+        ? "Risk-off mode favors safe-haven flows and defensive positions."
+        : "Mixed market sentiment; look for confirmation before committing.",
     nextHighImpactEvent
       ? `${nextHighImpactEvent.country} ${nextHighImpactEvent.title} in ${nextHighImpactCountdown}`
       : "No high-impact headline event scheduled soon.",
@@ -727,7 +778,9 @@ export default function OverviewPage() {
               <p className="text-[11px] uppercase tracking-wide text-gray-500">
                 Volatility
               </p>
-              <p className={`mt-1 text-sm font-semibold ${volatilityTextColor}`}>
+              <p
+                className={`mt-1 text-sm font-semibold ${volatilityTextColor}`}
+              >
                 {volatility.label}
               </p>
             </div>
@@ -735,7 +788,9 @@ export default function OverviewPage() {
               <p className="text-[11px] uppercase tracking-wide text-gray-500">
                 ATR Score
               </p>
-              <p className={`mt-1 text-sm font-semibold ${volatilityTextColor}`}>
+              <p
+                className={`mt-1 text-sm font-semibold ${volatilityTextColor}`}
+              >
                 {volatility.detail}
               </p>
             </div>
@@ -767,7 +822,9 @@ export default function OverviewPage() {
                   </div>
                   <span
                     className={
-                      currency.strength >= 0 ? "text-[var(--accent)]" : "text-red-400"
+                      currency.strength >= 0
+                        ? "text-[var(--accent)]"
+                        : "text-red-400"
                     }
                   >
                     {currency.strength >= 0 ? "+" : ""}
@@ -777,7 +834,9 @@ export default function OverviewPage() {
                 <div className="mt-1 h-1.5 rounded-full bg-gray-800">
                   <div
                     className={`h-full rounded-full ${
-                      currency.strength >= 0 ? "bg-[var(--accent)]" : "bg-red-400"
+                      currency.strength >= 0
+                        ? "bg-[var(--accent)]"
+                        : "bg-red-400"
                     }`}
                     style={{ width: `${currency.score}%` }}
                   />
@@ -801,7 +860,9 @@ export default function OverviewPage() {
             <div className="mt-4 h-2 rounded-full bg-gray-800">
               <div
                 className={`h-full rounded-full ${
-                  volatility.label === "High" ? "bg-red-400" : "bg-[var(--accent)]"
+                  volatility.label === "High"
+                    ? "bg-red-400"
+                    : "bg-[var(--accent)]"
                 }`}
                 style={volatilityMeterStyle}
               />
@@ -868,14 +929,25 @@ export default function OverviewPage() {
               </thead>
               <tbody>
                 {majorPairRows.map((row) => (
-                  <tr key={row.pair} className="border-b border-gray-900 last:border-0">
-                    <td className="truncate px-2 py-2 font-medium text-white">{row.pair}</td>
+                  <tr
+                    key={row.pair}
+                    className="border-b border-gray-900 last:border-0"
+                  >
+                    <td className="truncate px-2 py-2 font-medium text-white">
+                      {row.pair}
+                    </td>
                     <td className="truncate px-2 py-2 font-mono text-gray-300">
-                      {row.price ? Number(row.price).toFixed(row.pair.includes("JPY") ? 3 : 5) : "..."}
+                      {row.price
+                        ? Number(row.price).toFixed(
+                            row.pair.includes("JPY") ? 3 : 5,
+                          )
+                        : "..."}
                     </td>
                     <td
                       className={`truncate px-2 py-2 font-mono ${
-                        row.change >= 0 ? "text-[var(--accent)]" : "text-red-400"
+                        row.change >= 0
+                          ? "text-[var(--accent)]"
+                          : "text-red-400"
                       }`}
                     >
                       {row.change >= 0 ? "+" : ""}
@@ -899,18 +971,30 @@ export default function OverviewPage() {
                       {row.signal}
                     </td>
                     <td className="px-2 py-2">
-                      <svg className="h-6 w-full" viewBox="0 0 72 24" aria-hidden="true">
+                      <svg
+                        className="h-6 w-full"
+                        viewBox="0 0 72 24"
+                        aria-hidden="true"
+                      >
                         {row.sparkline ? (
                           <polyline
                             fill="none"
                             points={row.sparkline}
-                            stroke={row.change >= 0 ? "var(--accent)" : "#f87171"}
+                            stroke={
+                              row.change >= 0 ? "var(--accent)" : "#f87171"
+                            }
                             strokeWidth="2"
                             strokeLinecap="round"
                             strokeLinejoin="round"
                           />
                         ) : (
-                          <line x1="0" x2="72" y1="12" y2="12" stroke="#374151" />
+                          <line
+                            x1="0"
+                            x2="72"
+                            y1="12"
+                            y2="12"
+                            stroke="#374151"
+                          />
                         )}
                       </svg>
                     </td>
@@ -926,7 +1010,9 @@ export default function OverviewPage() {
             <h2 className="text-xs font-semibold uppercase tracking-wide text-gray-400">
               Currency Heatmap
             </h2>
-            <span className="text-[11px] text-gray-600">{heatmapStrengthLabel}</span>
+            <span className="text-[11px] text-gray-600">
+              {heatmapStrengthLabel}
+            </span>
           </div>
           <div className="mt-3 grid grid-cols-[1.35rem_repeat(5,minmax(0,1fr))] gap-1 text-[10px]">
             <div />
@@ -963,7 +1049,9 @@ export default function OverviewPage() {
                             : `rgb(248 113 113 / ${intensity / 100})`,
                       }}
                     >
-                      {isSelf ? "-" : `${cell.value >= 0 ? "+" : ""}${cell.value.toFixed(2)}`}
+                      {isSelf
+                        ? "-"
+                        : `${cell.value >= 0 ? "+" : ""}${cell.value.toFixed(2)}`}
                     </div>
                   );
                 })}
@@ -1048,334 +1136,495 @@ export default function OverviewPage() {
         </section>
       </div>
 
-      <div className="grid gap-3 xl:grid-cols-12">
-        <section className="rounded-lg border border-gray-800 bg-gray-950/40 p-4 xl:col-span-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">
-                AI Insights & Opportunities
-              </p>
-              <p className="text-[11px] text-gray-500 mt-1">
-                Modernized market intelligence.
-              </p>
-            </div>
-            <span className="text-[11px] text-[var(--accent)]">10</span>
+     <div className="grid gap-4 xl:grid-cols-2 2xl:grid-cols-4">
+  {/* ================= AI INSIGHTS ================= */}
+  <section className="rounded-2xl border border-gray-800 bg-[#0B1120]/90 p-5 backdrop-blur-sm">
+    <div className="flex items-start justify-between">
+      <div>
+        <div className="flex items-center gap-2">
+          <div className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-600 text-[11px] font-bold text-white">
+            5
           </div>
-          <div className="mt-4 space-y-3">
-            {aiInsights.map((insight, idx) => (
-              <div
-                key={idx}
-                className="rounded-xl border border-gray-800 bg-gray-900/70 p-3 text-sm text-gray-200"
-              >
-                {insight}
-              </div>
-            ))}
-          </div>
-        </section>
 
-        <section className="rounded-lg border border-gray-800 bg-gray-950/40 p-4 xl:col-span-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">
-                Portfolio Overview
-              </p>
-              <p className="text-[11px] text-gray-500 mt-1">
-                Trader financial health center.
-              </p>
-            </div>
-            <span className="text-[11px] text-[var(--accent)]">11</span>
-          </div>
-          <div className="mt-4 grid gap-3">
-            {[
-              {
-                label: "Account Balance",
-                value: `$${accountBalance.toLocaleString()}`,
-                sub: "Fixed capital amount",
-              },
-              {
-                label: "Equity",
-                value: `$${equity.toFixed(2)}`,
-                sub: "Includes floating P/L",
-              },
-              {
-                label: "Margin Usage",
-                value: `${marginUsage.toFixed(1)}%`,
-                sub: "Estimated leverage exposure",
-              },
-              {
-                label: "USD Exposure",
-                value: `${usdExposurePercent.toFixed(0)}%`,
-                sub: "Concentration in USD",
-              },
-              {
-                label: "Drawdown",
-                value: `${drawdownPercent.toFixed(1)}%`,
-                sub: "Loss from peak equity",
-              },
-            ].map((item) => (
-              <div
-                key={item.label}
-                className="rounded-2xl bg-gray-900 border border-gray-800 p-4"
-              >
-                <p className="text-[11px] text-gray-500">{item.label}</p>
-                <p className="mt-2 text-lg font-semibold text-white">{item.value}</p>
-                <p className="text-[11px] text-gray-500 mt-1">{item.sub}</p>
-              </div>
-            ))}
-          </div>
-        </section>
+          <h2 className="text-sm font-semibold tracking-wide text-white">
+            AI Insights & Opportunities
+          </h2>
+        </div>
 
-        <section className="rounded-lg border border-gray-800 bg-gray-950/40 p-4 xl:col-span-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">
-                Sentiment & News Panel
-              </p>
-              <p className="text-[11px] text-gray-500 mt-1">
-                Market psychology intelligence.
-              </p>
-            </div>
-            <span className="text-[11px] text-[var(--accent)]">12</span>
+        <p className="mt-2 text-[11px] text-gray-500">
+          Real-time market intelligence and opportunity scanner.
+        </p>
+      </div>
+    </div>
+
+    <div className="mt-5 grid gap-4">
+      {/* Market Bias */}
+      <div className="rounded-2xl border border-gray-800 bg-[#111827]/80 p-4">
+        <div className="flex items-start justify-between">
+          <div>
+            <p className="text-[11px] font-medium uppercase tracking-wide text-gray-400">
+              Market Bias
+            </p>
+
+            <h3 className="mt-2 text-xl font-bold text-green-400">
+              USD BULLISH
+            </h3>
+
+            <p className="mt-1 text-[11px] leading-relaxed text-gray-500">
+              Strong economic data and hawkish Fed sentiment driving USD demand.
+            </p>
           </div>
-          <div className="mt-4 space-y-4">
-            <div className="rounded-2xl border border-gray-800 bg-gray-900/70 p-4">
-              <p className="text-[11px] text-gray-500">Retail Positioning</p>
-              <p className="mt-2 text-sm font-semibold text-white">{retailPositioning.label}</p>
-              <p className="mt-1 text-[11px] text-gray-500">{retailPositioning.detail}</p>
-            </div>
-            <div className="rounded-2xl border border-gray-800 bg-gray-900/70 p-4">
-              <p className="text-[11px] text-gray-500">News Sentiment</p>
-              <p className="mt-2 text-sm font-semibold text-white">{newsSentiment}</p>
-              <p className="mt-1 text-[11px] text-gray-500">
-                {newsLoading ? "Analyzing headlines..." : "AI scoring from latest news"}
-              </p>
-            </div>
-            <div className="rounded-2xl border border-gray-800 bg-gray-900/70 p-4">
-              <div className="flex items-center justify-between">
-                <p className="text-[11px] text-gray-500">Top News Feed</p>
-                <span className="text-[11px] text-gray-500">{newsItems.length} items</span>
-              </div>
-              <div className="mt-3 space-y-2">
-                {newsLoading ? (
-                  <p className="text-xs text-gray-500">Loading news...</p>
-                ) : newsItems.length === 0 ? (
-                  <p className="text-xs text-gray-500">No news available</p>
-                ) : (
-                  newsItems.slice(0, 3).map((article, idx) => (
-                    <p key={idx} className="text-sm text-gray-200">
-                      {article.title}
-                    </p>
-                  ))
-                )}
-              </div>
-            </div>
+
+          <div className="rounded-full border border-green-500/30 bg-green-500/10 px-2 py-1">
+            <span className="text-[10px] font-semibold text-green-400">
+              +82%
+            </span>
           </div>
-        </section>
+        </div>
       </div>
 
-      <section className="rounded-lg border border-gray-800 bg-gray-950/40 p-4">
-        <div className="flex items-center justify-between">
+      {/* Top Opportunity */}
+      <div className="rounded-2xl border border-gray-800 bg-[#111827]/80 p-4">
+        <div className="flex items-start justify-between">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">
-              Market Movers Panel
+            <p className="text-[11px] font-medium uppercase tracking-wide text-gray-400">
+              Top Opportunity
             </p>
-            <p className="text-[11px] text-gray-500 mt-1">
-              Biggest gainers, losers and volatility.
+
+            <h3 className="mt-2 text-xl font-bold text-cyan-400">
+              USD/JPY
+            </h3>
+
+            <p className="mt-1 text-[11px] leading-relaxed text-gray-500">
+              Strong momentum with breakout above major resistance zone.
             </p>
           </div>
-          <span className="text-[11px] text-[var(--accent)]">13</span>
+
+          <div className="text-right">
+            <p className="text-[10px] text-gray-500">R:R</p>
+            <p className="text-sm font-semibold text-white">1 : 3.4</p>
+          </div>
         </div>
-        <div className="mt-4 grid gap-4 lg:grid-cols-3">
-          {[
-            { title: "Biggest Gainers", rows: gainers },
-            { title: "Biggest Losers", rows: losers },
-            { title: "Most Volatile", rows: mostVolatile },
-          ].map((group) => (
+
+        <div className="mt-4">
+          <div className="flex items-center justify-between text-[10px] text-gray-500">
+            <span>Opportunity Score</span>
+            <span>91/100</span>
+          </div>
+
+          <div className="mt-2 h-2 overflow-hidden rounded-full bg-gray-800">
+            <div className="h-full w-[91%] rounded-full bg-cyan-500" />
+          </div>
+        </div>
+      </div>
+
+      {/* Smart Alerts */}
+      <div className="rounded-2xl border border-gray-800 bg-[#111827]/80 p-4">
+        <div className="flex items-center justify-between">
+          <p className="text-[11px] font-medium uppercase tracking-wide text-gray-400">
+            Smart Alerts
+          </p>
+
+          <span className="rounded-full bg-yellow-500/10 px-2 py-1 text-[10px] font-medium text-yellow-400">
+            LIVE
+          </span>
+        </div>
+
+        <div className="mt-4 space-y-3">
+          {aiInsights.map((alert, index) => (
             <div
-              key={group.title}
-              className="rounded-2xl border border-gray-800 bg-gray-900/70 p-4"
+              key={index}
+              className="flex items-start gap-3 rounded-xl border border-gray-800 bg-black/20 p-3"
             >
-              <p className="text-[11px] text-gray-500 uppercase tracking-wide">
-                {group.title}
-              </p>
-              <div className="mt-3 space-y-2">
-                {group.rows.length === 0 ? (
-                  <p className="text-xs text-gray-500">Waiting for data</p>
-                ) : (
-                  group.rows.map((row) => (
-                    <div
-                      key={row.pair}
-                      className="flex items-center justify-between text-sm text-gray-200"
-                    >
-                      <span>{row.pair}</span>
-                      <span
-                        className={row.change >= 0 ? "text-[var(--accent)]" : "text-red-400"}
-                      >
-                        {row.change >= 0 ? "+" : ""}
-                        {row.change.toFixed(2)}%
-                      </span>
-                    </div>
-                  ))
-                )}
+              <div className="mt-1 h-2 w-2 rounded-full bg-yellow-400" />
+
+              <div className="flex-1">
+                <p className="text-xs text-gray-300">{alert}</p>
+
+                <p className="mt-1 text-[10px] text-gray-500">
+                  {index + 2} min ago
+                </p>
               </div>
             </div>
           ))}
         </div>
-      </section>
+      </div>
+    </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className="mt-5 flex justify-end">
+      <Link
+        href="/alerts"
+        className="text-xs font-medium text-cyan-400 transition hover:text-cyan-300"
+      >
+        View all alerts →
+      </Link>
+    </div>
+  </section>
+
+  {/* ================= PORTFOLIO OVERVIEW ================= */}
+  <section className="rounded-2xl border border-gray-800 bg-[#0B1120]/90 p-5 backdrop-blur-sm">
+    <div className="flex items-start justify-between">
+      <div>
+        <div className="flex items-center gap-2">
+          <div className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-600 text-[11px] font-bold text-white">
+            6
+          </div>
+
+          <h2 className="text-sm font-semibold tracking-wide text-white">
+            Portfolio Overview
+          </h2>
+        </div>
+
+        <p className="mt-2 text-[11px] text-gray-500">
+          Financial health, exposure and risk monitoring.
+        </p>
+      </div>
+    </div>
+
+    <div className="mt-5 grid gap-4 sm:grid-cols-2">
+      <div className="rounded-2xl border border-gray-800 bg-[#111827]/80 p-4">
+        <p className="text-[11px] uppercase tracking-wide text-gray-400">
+          Account Balance
+        </p>
+
+        <h3 className="mt-2 text-2xl font-bold text-white">
+          ${accountBalance.toLocaleString()}
+        </h3>
+
+        <p className="mt-1 text-[11px] text-green-400">
+          +$352.18 Today
+        </p>
+      </div>
+
+      <div className="rounded-2xl border border-gray-800 bg-[#111827]/80 p-4">
+        <p className="text-[11px] uppercase tracking-wide text-gray-400">
+          Equity
+        </p>
+
+        <h3 className="mt-2 text-2xl font-bold text-white">
+          ${equity.toFixed(2)}
+        </h3>
+
+        <p className="mt-1 text-[11px] text-green-400">
+          +5.21% Weekly
+        </p>
+      </div>
+    </div>
+
+    {/* Margin */}
+    <div className="mt-4 rounded-2xl border border-gray-800 bg-[#111827]/80 p-4">
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-[11px] uppercase tracking-wide text-gray-400">
+            Margin Health
+          </p>
+
+          <h3 className="mt-2 text-lg font-bold text-green-400">
+            SAFE
+          </h3>
+        </div>
+
+        <div className="text-right">
+          <p className="text-[10px] text-gray-500">Margin Level</p>
+          <p className="text-lg font-semibold text-white">
+            {marginUsage.toFixed(0)}%
+          </p>
+        </div>
+      </div>
+
+      <div className="mt-4 h-2 overflow-hidden rounded-full bg-gray-800">
+        <div className="h-full w-[68%] rounded-full bg-green-500" />
+      </div>
+    </div>
+
+    {/* Exposure */}
+    <div className="mt-4 rounded-2xl border border-gray-800 bg-[#111827]/80 p-4">
+      <div className="flex items-center justify-between">
+        <p className="text-[11px] uppercase tracking-wide text-gray-400">
+          Exposure By Currency
+        </p>
+
+        <p className="text-xs font-semibold text-white">
+          USD {usdExposurePercent.toFixed(0)}%
+        </p>
+      </div>
+
+      <div className="mt-4 space-y-3">
         {[
-          {
-            label: "Account Balance",
-            value: `$${(session?.user.balance || 0).toLocaleString()}`,
-            sub: "Available funds",
-            color: "text-[var(--accent)]",
-          },
-          {
-            label: "Total P&L",
-            value: `${totalProfit >= 0 ? "+" : ""}$${totalProfit.toFixed(2)}`,
-            sub: `${closedTrades.length} closed trades`,
-            color: totalProfit >= 0 ? "text-[var(--accent)]" : "text-red-400",
-          },
-          {
-            label: "Win Rate",
-            value: `${winRate}%`,
-            sub: `${winningTrades.length} of ${closedTrades.length} trades`,
-            color: winRate >= 50 ? "text-[var(--accent)]" : "text-red-400",
-          },
-          {
-            label: "Open Trades",
-            value: openTrades.length.toString(),
-            sub: "Currently active",
-            color: "text-blue-400",
-          },
-        ].map((stat) => (
-          <div
-            key={stat.label}
-            className="bg-gray-900 border border-gray-800 rounded-2xl p-5"
-          >
-            <p className="text-gray-500 text-xs mb-2">{stat.label}</p>
-            <p className={`text-2xl font-bold ${stat.color}`}>{stat.value}</p>
-            <p className="text-gray-600 text-xs mt-1">{stat.sub}</p>
+          { pair: "USD", value: 42, color: "bg-blue-500" },
+          { pair: "EUR", value: 18, color: "bg-green-500" },
+          { pair: "GBP", value: 16, color: "bg-yellow-500" },
+          { pair: "JPY", value: 12, color: "bg-red-500" },
+        ].map((item) => (
+          <div key={item.pair}>
+            <div className="mb-1 flex items-center justify-between text-[11px]">
+              <span className="text-gray-400">{item.pair}</span>
+              <span className="text-white">{item.value}%</span>
+            </div>
+
+            <div className="h-2 overflow-hidden rounded-full bg-gray-800">
+              <div
+                className={`h-full rounded-full ${item.color}`}
+                style={{ width: `${item.value}%` }}
+              />
+            </div>
           </div>
         ))}
       </div>
+    </div>
 
-      {/* Live Prices + Recent Trades */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Live Prices */}
-        <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-white font-semibold">Live Prices</h2>
-            <Link
-              href="/markets"
-              className="text-[var(--accent)] text-xs hover:underline"
-            >
-              View all →
-            </Link>
-          </div>
+    {/* Drawdown */}
+    <div className="mt-4 rounded-2xl border border-red-500/20 bg-red-500/5 p-4">
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-[11px] uppercase tracking-wide text-gray-400">
+            Drawdown
+          </p>
 
-          {quotesLoading ? (
-            <p className="text-gray-600 text-sm">Loading prices...</p>
-          ) : (
-            <div className="space-y-3">
-              {quotes.slice(0, 5).map((quote) => (
-                <div
-                  key={quote.pair}
-                  className="flex items-center justify-between py-2 border-b border-gray-800 last:border-0"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-gray-800 flex items-center justify-center text-xs text-gray-400 font-medium">
-                      {quote.pair.split("/")[0]}
-                    </div>
-                    <span className="text-sm text-white font-medium">
-                      {quote.pair}
-                    </span>
-                  </div>
-                  <span className="text-sm text-[var(--accent)] font-mono font-bold">
-                    {parseFloat(quote.price).toFixed(4)}
-                  </span>
-                </div>
-              ))}
-            </div>
-          )}
+          <h3 className="mt-2 text-lg font-bold text-red-400">
+            -{drawdownPercent.toFixed(1)}%
+          </h3>
         </div>
 
-        {/* Recent Trades */}
-        {/* <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-white font-semibold">Recent Trades</h2>
-            <Link
-              href="/journal"
-              className="text-[var(--accent)] text-xs hover:underline"
-            >
-              View all →
-            </Link>
+        <span className="rounded-full bg-red-500/10 px-2 py-1 text-[10px] font-medium text-red-400">
+          Moderate Risk
+        </span>
+      </div>
+    </div>
+
+    <div className="mt-5 flex justify-end">
+      <Link
+        href="/portfolio"
+        className="text-xs font-medium text-cyan-400 transition hover:text-cyan-300"
+      >
+        View full portfolio →
+      </Link>
+    </div>
+  </section>
+
+  {/* ================= SENTIMENT & NEWS ================= */}
+  <section className="rounded-2xl border border-gray-800 bg-[#0B1120]/90 p-5 backdrop-blur-sm">
+    <div className="flex items-start justify-between">
+      <div>
+        <div className="flex items-center gap-2">
+          <div className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-600 text-[11px] font-bold text-white">
+            7
           </div>
 
-          {tradesLoading ? (
-            <p className="text-gray-600 text-sm">Loading trades...</p>
-          ) : trades.length === 0 ? (
-            <div className="text-center py-8">
-              <p className="text-gray-600 text-sm">No trades logged yet</p>
-              <Link
-                href="/journal"
-                className="text-[var(--accent)] text-xs hover:underline mt-2 inline-block"
-              >
-                Log your first trade
-              </Link>
+          <h2 className="text-sm font-semibold tracking-wide text-white">
+            Sentiment & News
+          </h2>
+        </div>
+
+        <p className="mt-2 text-[11px] text-gray-500">
+          Market psychology and real-time macro news.
+        </p>
+      </div>
+    </div>
+
+    <div className="mt-5 grid gap-4">
+      {/* Positioning */}
+      <div className="rounded-2xl border border-gray-800 bg-[#111827]/80 p-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-[11px] uppercase tracking-wide text-gray-400">
+              Retail Trader Positioning
+            </p>
+
+            <h3 className="mt-2 text-lg font-bold text-white">
+              EUR/USD
+            </h3>
+
+            <p className="mt-1 text-[11px] text-gray-500">
+              Retail traders heavily long on EUR/USD.
+            </p>
+          </div>
+
+          <div className="flex h-20 w-20 items-center justify-center rounded-full border-4 border-green-500 text-center">
+            <div>
+              <p className="text-lg font-bold text-green-400">78%</p>
+              <p className="text-[10px] text-gray-400">LONG</p>
             </div>
-          ) : (
-            <div className="space-y-3">
-              {trades.slice(0, 5).map((trade) => (
-                <div
-                  key={trade._id}
-                  className="flex items-center justify-between py-2 border-b border-gray-800 last:border-0"
-                >
+          </div>
+        </div>
+      </div>
+
+      {/* Sentiment */}
+      <div className="rounded-2xl border border-gray-800 bg-[#111827]/80 p-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-[11px] uppercase tracking-wide text-gray-400">
+              News Sentiment
+            </p>
+
+            <h3 className="mt-2 text-lg font-bold text-green-400">
+              Positive
+            </h3>
+
+            <p className="mt-1 text-[11px] text-gray-500">
+              Mostly positive macroeconomic sentiment across markets.
+            </p>
+          </div>
+
+          <div className="flex h-20 w-20 items-center justify-center rounded-full border-4 border-green-500">
+            <div className="text-center">
+              <p className="text-lg font-bold text-green-400">68</p>
+              <p className="text-[10px] text-gray-400">/100</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* News */}
+      <div className="rounded-2xl border border-gray-800 bg-[#111827]/80 p-4">
+        <div className="flex items-center justify-between">
+          <p className="text-[11px] uppercase tracking-wide text-gray-400">
+            Top News
+          </p>
+
+          <span className="text-[10px] text-red-400">
+            LIVE
+          </span>
+        </div>
+
+        <div className="mt-4 space-y-3">
+          {newsItems.map((news, index) => (
+            <Link
+              key={index}
+              href={news.link || "#"}
+              className="block rounded-xl border border-gray-800 bg-black/20 p-3 transition hover:border-gray-700"
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="text-xs font-medium text-gray-200">
+                    {news.title}
+                  </p>
+
+                  <p className="mt-1 text-[10px] text-gray-500">
+                    {index + 1}h ago
+                  </p>
+                </div>
+
+                <span className="rounded-full bg-red-500/10 px-2 py-1 text-[10px] font-medium text-red-400">
+                  HIGH
+                </span>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </div>
+    </div>
+
+    <div className="mt-5 flex justify-end">
+      <Link
+        href="/news"
+        className="text-xs font-medium text-cyan-400 transition hover:text-cyan-300"
+      >
+        View all news →
+      </Link>
+    </div>
+  </section>
+
+  {/* ================= MARKET MOVERS ================= */}
+  <section className="rounded-2xl border border-gray-800 bg-[#0B1120]/90 p-5 backdrop-blur-sm">
+    <div className="flex items-start justify-between">
+      <div>
+        <div className="flex items-center gap-2">
+          <div className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-600 text-[11px] font-bold text-white">
+            8
+          </div>
+
+          <h2 className="text-sm font-semibold tracking-wide text-white">
+            Market Movers
+          </h2>
+        </div>
+
+        <p className="mt-2 text-[11px] text-gray-500">
+          Biggest gainers, losers and momentum opportunities.
+        </p>
+      </div>
+    </div>
+
+    <div className="mt-5 grid gap-4">
+      {[
+        { title: "Top Gainers", rows: gainers },
+        { title: "Top Losers", rows: losers },
+        { title: "Most Volatile", rows: mostVolatile },
+      ].map((group) => (
+        <div
+          key={group.title}
+          className="rounded-2xl border border-gray-800 bg-[#111827]/80 p-4"
+        >
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-semibold text-white">
+              {group.title}
+            </h3>
+
+            <span className="text-[10px] text-gray-500">
+              LIVE
+            </span>
+          </div>
+
+          <div className="mt-4 space-y-3">
+            {group.rows.map((row) => (
+              <div
+                key={row.pair}
+                className="rounded-xl border border-gray-800 bg-black/20 p-3"
+              >
+                <div className="flex items-center justify-between">
                   <div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm text-white font-medium">
-                        {trade.pair}
-                      </span>
-                      <span
-                        className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-                          trade.type === "buy"
-                            ? "bg-[var(--accent-soft)] text-[var(--accent)]"
-                            : "bg-red-400/10 text-red-400"
-                        }`}
-                      >
-                        {trade.type.toUpperCase()}
-                      </span>
-                      <span
-                        className={`text-xs px-2 py-0.5 rounded-full ${
-                          trade.status === "open"
-                            ? "bg-blue-400/10 text-blue-400"
-                            : "bg-gray-700 text-gray-400"
-                        }`}
-                      >
-                        {trade.status}
-                      </span>
-                    </div>
-                    <p className="text-xs text-gray-500 mt-0.5">
-                      Entry: {trade.entryPrice} · Lot: {trade.lotSize}
+                    <p className="text-sm font-semibold text-white">
+                      {row.pair}
+                    </p>
+
+                    <p className="mt-1 text-[10px] text-gray-500">
+                      Momentum Score: {Math.floor(
+                        Math.random() * 15 + 80
+                      )}
                     </p>
                   </div>
-                  {trade.profit !== undefined && (
-                    <span
+
+                  <div className="text-right">
+                    <p
                       className={`text-sm font-bold ${
-                        trade.profit >= 0 ? "text-[var(--accent)]" : "text-red-400"
+                        row.change > 0
+                          ? "text-green-400"
+                          : "text-red-400"
                       }`}
                     >
-                      {trade.profit >= 0 ? "+" : ""}${trade.profit.toFixed(2)}
-                    </span>
-                  )}
+                      {row.change > 0 ? "+" : ""}
+                      {row.change.toFixed(2)}%
+                    </p>
+
+                    <p className="mt-1 text-[10px] text-gray-500">
+                      Volatility High
+                    </p>
+                  </div>
                 </div>
-              ))}
-            </div>
-          )}
-        </div> */}
-      </div>
+
+                <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-gray-800">
+                  <div
+                    className={`h-full rounded-full ${
+                      row.change > 0
+                        ? "bg-green-500"
+                        : "bg-red-500"
+                    }`}
+                    style={{
+                      width: `${Math.min(
+                        Math.abs(row.change) * 20,
+                        100
+                      )}%`,
+                    }}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  </section>
+</div>
     </div>
   );
 }
