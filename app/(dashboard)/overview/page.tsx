@@ -1136,13 +1136,13 @@ export default function OverviewPage() {
         </section>
       </div>
 
-     <div className="grid gap-4 xl:grid-cols-2 2xl:grid-cols-4">
+     <div className="grid gap-3">
   {/* ================= AI INSIGHTS ================= */}
-  <section className="rounded-2xl border border-gray-800 bg-[#0B1120]/90 p-5 backdrop-blur-sm">
+  <section className="rounded-lg border border-gray-800 bg-gray-950/40 p-4">
     <div className="flex items-start justify-between">
       <div>
         <div className="flex items-center gap-2">
-          <div className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-600 text-[11px] font-bold text-white">
+          <div className="flex h-5 w-5 items-center justify-center rounded-md border border-gray-800 bg-gray-900/70 text-[10px] font-semibold text-gray-400">
             5
           </div>
 
@@ -1157,16 +1157,16 @@ export default function OverviewPage() {
       </div>
     </div>
 
-    <div className="mt-5 grid gap-4">
+    <div className="mt-4 grid gap-3">
       {/* Market Bias */}
-      <div className="rounded-2xl border border-gray-800 bg-[#111827]/80 p-4">
+      <div className="rounded-lg border border-gray-800 bg-gray-900/70 p-3">
         <div className="flex items-start justify-between">
           <div>
             <p className="text-[11px] font-medium uppercase tracking-wide text-gray-400">
               Market Bias
             </p>
 
-            <h3 className="mt-2 text-xl font-bold text-green-400">
+            <h3 className="mt-1.5 text-lg font-semibold text-[var(--accent)]">
               USD BULLISH
             </h3>
 
@@ -1175,8 +1175,8 @@ export default function OverviewPage() {
             </p>
           </div>
 
-          <div className="rounded-full border border-green-500/30 bg-green-500/10 px-2 py-1">
-            <span className="text-[10px] font-semibold text-green-400">
+          <div className="rounded-md border border-gray-800 bg-gray-950/50 px-2 py-1">
+            <span className="text-[10px] font-semibold text-[var(--accent)]">
               +82%
             </span>
           </div>
@@ -1184,14 +1184,14 @@ export default function OverviewPage() {
       </div>
 
       {/* Top Opportunity */}
-      <div className="rounded-2xl border border-gray-800 bg-[#111827]/80 p-4">
+      <div className="rounded-lg border border-gray-800 bg-gray-900/70 p-3">
         <div className="flex items-start justify-between">
           <div>
             <p className="text-[11px] font-medium uppercase tracking-wide text-gray-400">
               Top Opportunity
             </p>
 
-            <h3 className="mt-2 text-xl font-bold text-cyan-400">
+            <h3 className="mt-1.5 text-lg font-semibold text-white">
               USD/JPY
             </h3>
 
@@ -1212,31 +1212,31 @@ export default function OverviewPage() {
             <span>91/100</span>
           </div>
 
-          <div className="mt-2 h-2 overflow-hidden rounded-full bg-gray-800">
-            <div className="h-full w-[91%] rounded-full bg-cyan-500" />
+          <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-gray-800">
+            <div className="h-full w-[91%] rounded-full bg-[var(--accent)]" />
           </div>
         </div>
       </div>
 
       {/* Smart Alerts */}
-      <div className="rounded-2xl border border-gray-800 bg-[#111827]/80 p-4">
+      <div className="rounded-lg border border-gray-800 bg-gray-900/70 p-3">
         <div className="flex items-center justify-between">
           <p className="text-[11px] font-medium uppercase tracking-wide text-gray-400">
             Smart Alerts
           </p>
 
-          <span className="rounded-full bg-yellow-500/10 px-2 py-1 text-[10px] font-medium text-yellow-400">
+          <span className="rounded-md border border-gray-800 bg-gray-950/50 px-2 py-1 text-[10px] font-medium text-gray-400">
             LIVE
           </span>
         </div>
 
-        <div className="mt-4 space-y-3">
+        <div className="mt-3 grid gap-2 sm:grid-cols-3">
           {aiInsights.map((alert, index) => (
             <div
               key={index}
-              className="flex items-start gap-3 rounded-xl border border-gray-800 bg-black/20 p-3"
+              className="flex items-start gap-2 rounded-md border border-gray-800 bg-gray-950/50 p-2.5"
             >
-              <div className="mt-1 h-2 w-2 rounded-full bg-yellow-400" />
+              <div className="mt-1 h-1.5 w-1.5 rounded-full bg-[var(--accent)]" />
 
               <div className="flex-1">
                 <p className="text-xs text-gray-300">{alert}</p>
@@ -1251,10 +1251,10 @@ export default function OverviewPage() {
       </div>
     </div>
 
-    <div className="mt-5 flex justify-end">
+    <div className="mt-4 flex justify-end">
       <Link
         href="/alerts"
-        className="text-xs font-medium text-cyan-400 transition hover:text-cyan-300"
+        className="text-xs font-medium text-[var(--accent)] transition hover:text-white"
       >
         View all alerts →
       </Link>
@@ -1262,11 +1262,11 @@ export default function OverviewPage() {
   </section>
 
   {/* ================= PORTFOLIO OVERVIEW ================= */}
-  <section className="rounded-2xl border border-gray-800 bg-[#0B1120]/90 p-5 backdrop-blur-sm">
+  <section className="rounded-lg border border-gray-800 bg-gray-950/40 p-4">
     <div className="flex items-start justify-between">
       <div>
         <div className="flex items-center gap-2">
-          <div className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-600 text-[11px] font-bold text-white">
+          <div className="flex h-5 w-5 items-center justify-center rounded-md border border-gray-800 bg-gray-900/70 text-[10px] font-semibold text-gray-400">
             6
           </div>
 
@@ -1281,13 +1281,13 @@ export default function OverviewPage() {
       </div>
     </div>
 
-    <div className="mt-5 grid gap-4 sm:grid-cols-2">
-      <div className="rounded-2xl border border-gray-800 bg-[#111827]/80 p-4">
+    <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="rounded-lg border border-gray-800 bg-gray-900/70 p-3">
         <p className="text-[11px] uppercase tracking-wide text-gray-400">
           Account Balance
         </p>
 
-        <h3 className="mt-2 text-2xl font-bold text-white">
+        <h3 className="mt-1.5 text-xl font-semibold text-white">
           ${accountBalance.toLocaleString()}
         </h3>
 
@@ -1296,12 +1296,12 @@ export default function OverviewPage() {
         </p>
       </div>
 
-      <div className="rounded-2xl border border-gray-800 bg-[#111827]/80 p-4">
+      <div className="rounded-lg border border-gray-800 bg-gray-900/70 p-3">
         <p className="text-[11px] uppercase tracking-wide text-gray-400">
           Equity
         </p>
 
-        <h3 className="mt-2 text-2xl font-bold text-white">
+        <h3 className="mt-1.5 text-xl font-semibold text-white">
           ${equity.toFixed(2)}
         </h3>
 
@@ -1312,14 +1312,14 @@ export default function OverviewPage() {
     </div>
 
     {/* Margin */}
-    <div className="mt-4 rounded-2xl border border-gray-800 bg-[#111827]/80 p-4">
+    <div className="mt-3 rounded-lg border border-gray-800 bg-gray-900/70 p-3">
       <div className="flex items-center justify-between">
         <div>
           <p className="text-[11px] uppercase tracking-wide text-gray-400">
             Margin Health
           </p>
 
-          <h3 className="mt-2 text-lg font-bold text-green-400">
+          <h3 className="mt-1.5 text-base font-semibold text-[var(--accent)]">
             SAFE
           </h3>
         </div>
@@ -1332,13 +1332,13 @@ export default function OverviewPage() {
         </div>
       </div>
 
-      <div className="mt-4 h-2 overflow-hidden rounded-full bg-gray-800">
-        <div className="h-full w-[68%] rounded-full bg-green-500" />
+      <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-gray-800">
+        <div className="h-full w-[68%] rounded-full bg-[var(--accent)]" />
       </div>
     </div>
 
     {/* Exposure */}
-    <div className="mt-4 rounded-2xl border border-gray-800 bg-[#111827]/80 p-4">
+    <div className="mt-3 rounded-lg border border-gray-800 bg-gray-900/70 p-3">
       <div className="flex items-center justify-between">
         <p className="text-[11px] uppercase tracking-wide text-gray-400">
           Exposure By Currency
@@ -1349,7 +1349,7 @@ export default function OverviewPage() {
         </p>
       </div>
 
-      <div className="mt-4 space-y-3">
+      <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
         {[
           { pair: "USD", value: 42, color: "bg-blue-500" },
           { pair: "EUR", value: 18, color: "bg-green-500" },
@@ -1362,7 +1362,7 @@ export default function OverviewPage() {
               <span className="text-white">{item.value}%</span>
             </div>
 
-            <div className="h-2 overflow-hidden rounded-full bg-gray-800">
+            <div className="h-1.5 overflow-hidden rounded-full bg-gray-800">
               <div
                 className={`h-full rounded-full ${item.color}`}
                 style={{ width: `${item.value}%` }}
@@ -1374,28 +1374,28 @@ export default function OverviewPage() {
     </div>
 
     {/* Drawdown */}
-    <div className="mt-4 rounded-2xl border border-red-500/20 bg-red-500/5 p-4">
+    <div className="mt-3 rounded-lg border border-gray-800 bg-gray-900/70 p-3">
       <div className="flex items-center justify-between">
         <div>
           <p className="text-[11px] uppercase tracking-wide text-gray-400">
             Drawdown
           </p>
 
-          <h3 className="mt-2 text-lg font-bold text-red-400">
+          <h3 className="mt-1.5 text-base font-semibold text-red-400">
             -{drawdownPercent.toFixed(1)}%
           </h3>
         </div>
 
-        <span className="rounded-full bg-red-500/10 px-2 py-1 text-[10px] font-medium text-red-400">
+        <span className="rounded-md border border-red-400/20 bg-gray-950/50 px-2 py-1 text-[10px] font-medium text-red-400">
           Moderate Risk
         </span>
       </div>
     </div>
 
-    <div className="mt-5 flex justify-end">
+    <div className="mt-4 flex justify-end">
       <Link
         href="/portfolio"
-        className="text-xs font-medium text-cyan-400 transition hover:text-cyan-300"
+        className="text-xs font-medium text-[var(--accent)] transition hover:text-white"
       >
         View full portfolio →
       </Link>
@@ -1403,11 +1403,11 @@ export default function OverviewPage() {
   </section>
 
   {/* ================= SENTIMENT & NEWS ================= */}
-  <section className="rounded-2xl border border-gray-800 bg-[#0B1120]/90 p-5 backdrop-blur-sm">
+  <section className="rounded-lg border border-gray-800 bg-gray-950/40 p-4">
     <div className="flex items-start justify-between">
       <div>
         <div className="flex items-center gap-2">
-          <div className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-600 text-[11px] font-bold text-white">
+          <div className="flex h-5 w-5 items-center justify-center rounded-md border border-gray-800 bg-gray-900/70 text-[10px] font-semibold text-gray-400">
             7
           </div>
 
@@ -1422,9 +1422,9 @@ export default function OverviewPage() {
       </div>
     </div>
 
-    <div className="mt-5 grid gap-4">
+    <div className="mt-4 grid gap-3 lg:grid-cols-3">
       {/* Positioning */}
-      <div className="rounded-2xl border border-gray-800 bg-[#111827]/80 p-4">
+      <div className="rounded-lg border border-gray-800 bg-gray-900/70 p-3">
         <div className="flex items-center justify-between">
           <div>
             <p className="text-[11px] uppercase tracking-wide text-gray-400">
@@ -1440,9 +1440,9 @@ export default function OverviewPage() {
             </p>
           </div>
 
-          <div className="flex h-20 w-20 items-center justify-center rounded-full border-4 border-green-500 text-center">
+          <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full border-2 border-[var(--border-soft)] text-center">
             <div>
-              <p className="text-lg font-bold text-green-400">78%</p>
+              <p className="text-base font-semibold text-[var(--accent)]">78%</p>
               <p className="text-[10px] text-gray-400">LONG</p>
             </div>
           </div>
@@ -1450,7 +1450,7 @@ export default function OverviewPage() {
       </div>
 
       {/* Sentiment */}
-      <div className="rounded-2xl border border-gray-800 bg-[#111827]/80 p-4">
+      <div className="rounded-lg border border-gray-800 bg-gray-900/70 p-3">
         <div className="flex items-center justify-between">
           <div>
             <p className="text-[11px] uppercase tracking-wide text-gray-400">
@@ -1466,9 +1466,9 @@ export default function OverviewPage() {
             </p>
           </div>
 
-          <div className="flex h-20 w-20 items-center justify-center rounded-full border-4 border-green-500">
+          <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full border-2 border-[var(--border-soft)]">
             <div className="text-center">
-              <p className="text-lg font-bold text-green-400">68</p>
+              <p className="text-base font-semibold text-[var(--accent)]">68</p>
               <p className="text-[10px] text-gray-400">/100</p>
             </div>
           </div>
@@ -1476,7 +1476,7 @@ export default function OverviewPage() {
       </div>
 
       {/* News */}
-      <div className="rounded-2xl border border-gray-800 bg-[#111827]/80 p-4">
+      <div className="rounded-lg border border-gray-800 bg-gray-900/70 p-3">
         <div className="flex items-center justify-between">
           <p className="text-[11px] uppercase tracking-wide text-gray-400">
             Top News
@@ -1487,12 +1487,12 @@ export default function OverviewPage() {
           </span>
         </div>
 
-        <div className="mt-4 space-y-3">
-          {newsItems.map((news, index) => (
+        <div className="mt-3 space-y-2">
+          {newsItems.slice(0, 3).map((news, index) => (
             <Link
               key={index}
               href={news.link || "#"}
-              className="block rounded-xl border border-gray-800 bg-black/20 p-3 transition hover:border-gray-700"
+              className="block rounded-md border border-gray-800 bg-gray-950/50 p-2.5 transition hover:border-gray-700"
             >
               <div className="flex items-start justify-between gap-3">
                 <div>
@@ -1515,10 +1515,10 @@ export default function OverviewPage() {
       </div>
     </div>
 
-    <div className="mt-5 flex justify-end">
+    <div className="mt-4 flex justify-end">
       <Link
         href="/news"
-        className="text-xs font-medium text-cyan-400 transition hover:text-cyan-300"
+        className="text-xs font-medium text-[var(--accent)] transition hover:text-white"
       >
         View all news →
       </Link>
@@ -1526,11 +1526,11 @@ export default function OverviewPage() {
   </section>
 
   {/* ================= MARKET MOVERS ================= */}
-  <section className="rounded-2xl border border-gray-800 bg-[#0B1120]/90 p-5 backdrop-blur-sm">
+  <section className="rounded-lg border border-gray-800 bg-gray-950/40 p-4">
     <div className="flex items-start justify-between">
       <div>
         <div className="flex items-center gap-2">
-          <div className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-600 text-[11px] font-bold text-white">
+          <div className="flex h-5 w-5 items-center justify-center rounded-md border border-gray-800 bg-gray-900/70 text-[10px] font-semibold text-gray-400">
             8
           </div>
 
@@ -1545,7 +1545,7 @@ export default function OverviewPage() {
       </div>
     </div>
 
-    <div className="mt-5 grid gap-4">
+    <div className="mt-4 grid gap-3 lg:grid-cols-3">
       {[
         { title: "Top Gainers", rows: gainers },
         { title: "Top Losers", rows: losers },
@@ -1553,7 +1553,7 @@ export default function OverviewPage() {
       ].map((group) => (
         <div
           key={group.title}
-          className="rounded-2xl border border-gray-800 bg-[#111827]/80 p-4"
+          className="rounded-lg border border-gray-800 bg-gray-900/70 p-3"
         >
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-semibold text-white">
@@ -1565,11 +1565,11 @@ export default function OverviewPage() {
             </span>
           </div>
 
-          <div className="mt-4 space-y-3">
+          <div className="mt-3 space-y-2">
             {group.rows.map((row) => (
               <div
                 key={row.pair}
-                className="rounded-xl border border-gray-800 bg-black/20 p-3"
+                className="rounded-md border border-gray-800 bg-gray-950/50 p-2.5"
               >
                 <div className="flex items-center justify-between">
                   <div>
@@ -1602,7 +1602,7 @@ export default function OverviewPage() {
                   </div>
                 </div>
 
-                <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-gray-800">
+                <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-gray-800">
                   <div
                     className={`h-full rounded-full ${
                       row.change > 0
