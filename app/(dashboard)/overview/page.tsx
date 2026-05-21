@@ -1136,16 +1136,12 @@ export default function OverviewPage() {
         </section>
       </div>
 
-     <div className="grid gap-3">
+     <div className="grid gap-3 xl:grid-cols-4">
   {/* ================= AI INSIGHTS ================= */}
   <section className="rounded-lg border border-gray-800 bg-gray-950/40 p-4">
     <div className="flex items-start justify-between">
       <div>
         <div className="flex items-center gap-2">
-          <div className="flex h-5 w-5 items-center justify-center rounded-md border border-gray-800 bg-gray-900/70 text-[10px] font-semibold text-gray-400">
-            5
-          </div>
-
           <h2 className="text-sm font-semibold tracking-wide text-white">
             AI Insights & Opportunities
           </h2>
@@ -1266,10 +1262,6 @@ export default function OverviewPage() {
     <div className="flex items-start justify-between">
       <div>
         <div className="flex items-center gap-2">
-          <div className="flex h-5 w-5 items-center justify-center rounded-md border border-gray-800 bg-gray-900/70 text-[10px] font-semibold text-gray-400">
-            6
-          </div>
-
           <h2 className="text-sm font-semibold tracking-wide text-white">
             Portfolio Overview
           </h2>
@@ -1407,10 +1399,6 @@ export default function OverviewPage() {
     <div className="flex items-start justify-between">
       <div>
         <div className="flex items-center gap-2">
-          <div className="flex h-5 w-5 items-center justify-center rounded-md border border-gray-800 bg-gray-900/70 text-[10px] font-semibold text-gray-400">
-            7
-          </div>
-
           <h2 className="text-sm font-semibold tracking-wide text-white">
             Sentiment & News
           </h2>
@@ -1530,10 +1518,6 @@ export default function OverviewPage() {
     <div className="flex items-start justify-between">
       <div>
         <div className="flex items-center gap-2">
-          <div className="flex h-5 w-5 items-center justify-center rounded-md border border-gray-800 bg-gray-900/70 text-[10px] font-semibold text-gray-400">
-            8
-          </div>
-
           <h2 className="text-sm font-semibold tracking-wide text-white">
             Market Movers
           </h2>
