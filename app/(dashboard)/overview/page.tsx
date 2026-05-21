@@ -1136,7 +1136,7 @@ export default function OverviewPage() {
         </section>
       </div>
 
-     <div className="grid gap-3 xl:grid-cols-4">
+     <div className="grid items-start gap-3 xl:grid-cols-4">
   {/* ================= AI INSIGHTS ================= */}
   <section className="rounded-lg border border-gray-800 bg-gray-950/40 p-4">
     <div className="flex items-start justify-between">
@@ -1226,7 +1226,7 @@ export default function OverviewPage() {
           </span>
         </div>
 
-        <div className="mt-3 grid gap-2 sm:grid-cols-3">
+        <div className="mt-3 grid gap-2">
           {aiInsights.map((alert, index) => (
             <div
               key={index}
@@ -1273,7 +1273,7 @@ export default function OverviewPage() {
       </div>
     </div>
 
-    <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+    <div className="mt-4 grid gap-3">
       <div className="rounded-lg border border-gray-800 bg-gray-900/70 p-3">
         <p className="text-[11px] uppercase tracking-wide text-gray-400">
           Account Balance
@@ -1341,7 +1341,7 @@ export default function OverviewPage() {
         </p>
       </div>
 
-      <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mt-3 grid gap-2">
         {[
           { pair: "USD", value: 42, color: "bg-blue-500" },
           { pair: "EUR", value: 18, color: "bg-green-500" },
@@ -1410,7 +1410,7 @@ export default function OverviewPage() {
       </div>
     </div>
 
-    <div className="mt-4 grid gap-3 lg:grid-cols-3">
+    <div className="mt-4 grid gap-3">
       {/* Positioning */}
       <div className="rounded-lg border border-gray-800 bg-gray-900/70 p-3">
         <div className="flex items-center justify-between">
@@ -1529,7 +1529,7 @@ export default function OverviewPage() {
       </div>
     </div>
 
-    <div className="mt-4 grid gap-3 lg:grid-cols-3">
+    <div className="mt-4 grid gap-3">
       {[
         { title: "Top Gainers", rows: gainers },
         { title: "Top Losers", rows: losers },
