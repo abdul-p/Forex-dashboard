@@ -672,6 +672,22 @@ export default function OverviewPage() {
   const gainers = sortedByGain.slice(0, 3);
   const losers = sortedByLoss.slice(0, 3);
   const mostVolatile = sortedByVolatility.slice(0, 3);
+  const breakoutCandidates = [
+    {
+      pair: "EUR/USD",
+      detail: "Near major breakout zone",
+      score: 84,
+    },
+    {
+      pair: "USD/JPY",
+      detail: "Testing resistance cluster",
+      score: 81,
+    },
+  ];
+  const volumeSurges = [
+    { pair: "AUD/USD", detail: "Unusual activity +38%" },
+    { pair: "GBP/JPY", detail: "Institutional flow rising" },
+  ];
   const aiInsights = [
     majorPairRows[0]
       ? `${majorPairRows[0].pair} ${majorPairRows[0].change >= 0 ? "gaining upward momentum" : "showing downward pressure"}`
@@ -1400,11 +1416,11 @@ export default function OverviewPage() {
           </div>
         </section>
 
-        {/* ================= MARKET MOVERS ================= */}
+        {/* ================= MOMENTUM DISCOVERY ENGINE ================= */}
         <section className="flex min-w-0 flex-col rounded-lg border border-gray-800 bg-gray-950/40 xl:h-[18rem]">
           <div className="border-b border-gray-800 px-3 py-2">
             <h2 className="truncate text-xs font-semibold text-white">
-              Market Movers
+              Momentum Discovery Engine
             </h2>
           </div>
 
@@ -1423,48 +1439,95 @@ export default function OverviewPage() {
             ))}
           </div>
 
-          <div className="min-h-0 flex-1 px-3 py-3">
-            <div className="space-y-2 overflow-hidden">
-              {(gainers.length ? gainers : majorPairRows).slice(0, 5).map((row) => (
-                <div key={row.pair} className="grid grid-cols-[3rem_3.1rem_minmax(2rem,1fr)_2.6rem] items-center gap-1.5 text-[10px]">
-                  <span className="truncate font-medium text-gray-200">
-                    {row.pair}
-                  </span>
-                  <span className="truncate font-mono text-gray-300">
-                    {row.price
-                      ? Number(row.price).toFixed(row.pair.includes("JPY") ? 3 : 5)
-                      : "..."}
-                  </span>
-                  <svg
-                    className="h-5 min-w-0"
-                    viewBox="0 0 72 24"
-                    aria-hidden="true"
+          <div className="min-h-0 flex-1 overflow-hidden px-3 py-3">
+            <div className="grid grid-cols-2 gap-2">
+              <div className="rounded-md border border-gray-800 bg-gray-900/70 p-2">
+                <p className="mb-1 text-[9px] font-semibold text-gray-400">
+                  Momentum Score
+                </p>
+                {[
+                  ...(gainers.length ? gainers : majorPairRows).slice(0, 2),
+                  ...breakoutCandidates.slice(0, 1),
+                ].map((row, index) => (
+                  <div
+                    key={`${row.pair}-${index}`}
+                    className="mb-1 grid grid-cols-[1fr_1.5rem] gap-2 text-[10px]"
                   >
-                    {row.sparkline ? (
-                      <polyline
-                        fill="none"
-                        points={row.sparkline}
-                        stroke="#22c55e"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    ) : (
-                      <polyline
-                        fill="none"
-                        points="0,16 12,14 24,17 36,10 48,12 60,6 72,8"
-                        stroke="#22c55e"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    )}
-                  </svg>
-                  <span className="text-right font-semibold text-green-400">
-                    +{Math.abs(row.change || 0.28).toFixed(2)}%
-                  </span>
+                    <span className="truncate text-gray-300">{row.pair}</span>
+                    <span className="text-right font-semibold text-green-400">
+                      {"score" in row ? row.score : 92 - index * 4}
+                    </span>
+                  </div>
+                ))}
+              </div>
+
+              <div className="rounded-md border border-gray-800 bg-gray-900/70 p-2">
+                <p className="mb-1 text-[9px] font-semibold text-gray-400">
+                  Breakouts
+                </p>
+                {breakoutCandidates.map((item) => (
+                  <div key={item.pair} className="mb-1 text-[10px]">
+                    <p className="truncate font-medium text-gray-200">
+                      {item.pair}
+                    </p>
+                    <p className="truncate text-[9px] text-gray-500">
+                      {item.detail}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="mt-2 grid grid-cols-2 gap-2">
+              <div className="rounded-md border border-gray-800 bg-gray-900/70 p-2">
+                <p className="mb-1 text-[9px] font-semibold text-gray-400">
+                  Weakest / Fastest
+                </p>
+                <p className="truncate text-[10px] text-gray-300">
+                  <span className="text-red-400">
+                    {losers[0]?.pair || "USD/CHF"}
+                  </span>{" "}
+                  weakest pair
+                </p>
+                <p className="truncate text-[10px] text-gray-300">
+                  <span className="text-yellow-400">
+                    {mostVolatile[0]?.pair || "GBP/JPY"}
+                  </span>{" "}
+                  fastest-moving
+                </p>
+                {volumeSurges.slice(0, 1).map((item) => (
+                  <p key={item.pair} className="truncate text-[10px] text-gray-300">
+                    <span className="text-green-400">{item.pair}</span> surge
+                  </p>
+                ))}
+              </div>
+
+              <div className="rounded-md border border-gray-800 bg-gray-900/70 p-2">
+                <p className="mb-1 text-[9px] font-semibold text-gray-400">
+                  Technical Snapshot
+                </p>
+                <div className="grid grid-cols-3 gap-1 text-[9px]">
+                  <span className="text-gray-500">Trend</span>
+                  <span className="text-gray-500">RSI</span>
+                  <span className="text-gray-500">MACD</span>
+                  <span className="truncate text-green-400">Bullish</span>
+                  <span className="text-gray-300">71</span>
+                  <span className="truncate text-green-400">Positive</span>
                 </div>
-              ))}
+              </div>
+            </div>
+
+            <div className="mt-2 flex flex-wrap gap-1 overflow-hidden">
+              {["Volatility", "Trend", "Session", "Spread", "Correlation"].map(
+                (filter) => (
+                  <span
+                    key={filter}
+                    className="rounded border border-gray-800 bg-gray-900/70 px-1.5 py-0.5 text-[9px] text-gray-400"
+                  >
+                    {filter}
+                  </span>
+                ),
+              )}
             </div>
           </div>
 
@@ -1477,6 +1540,7 @@ export default function OverviewPage() {
             </Link>
           </div>
         </section>
+
       </div>
     </div>
   );

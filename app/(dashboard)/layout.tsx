@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { PanelLeftOpen } from "lucide-react";
 import Sidebar from "@/components/Sidebar";
+import FixedMarketTicker from "@/components/FixedMarketTicker";
 
 export default function DashboardLayout({
   children,
@@ -42,12 +43,13 @@ export default function DashboardLayout({
         </button>
       )}
       <main
-        className={`flex-1 overflow-y-auto p-8 transition-[margin,padding] ${
+        className={`flex-1 overflow-y-auto p-8 pb-20 transition-[margin,padding] ${
           isSidebarOpen ? "ml-72" : "ml-0 pl-24"
         }`}
       >
         {children}
       </main>
+      <FixedMarketTicker sidebarOpen={isSidebarOpen} />
     </div>
   );
 }
