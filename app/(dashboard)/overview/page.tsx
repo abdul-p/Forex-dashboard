@@ -1136,479 +1136,348 @@ export default function OverviewPage() {
         </section>
       </div>
 
-     <div className="grid items-start gap-3 xl:grid-cols-4">
-  {/* ================= AI INSIGHTS ================= */}
-  <section className="rounded-lg border border-gray-800 bg-gray-950/40 p-4">
-    <div className="flex items-start justify-between">
-      <div>
-        <div className="flex items-center gap-2">
-          <h2 className="text-sm font-semibold tracking-wide text-white">
-            AI Insights & Opportunities
-          </h2>
-        </div>
-
-        <p className="mt-2 text-[11px] text-gray-500">
-          Real-time market intelligence and opportunity scanner.
-        </p>
-      </div>
-    </div>
-
-    <div className="mt-4 grid gap-3">
-      {/* Market Bias */}
-      <div className="rounded-lg border border-gray-800 bg-gray-900/70 p-3">
-        <div className="flex items-start justify-between">
-          <div>
-            <p className="text-[11px] font-medium uppercase tracking-wide text-gray-400">
-              Market Bias
-            </p>
-
-            <h3 className="mt-1.5 text-lg font-semibold text-[var(--accent)]">
-              USD BULLISH
-            </h3>
-
-            <p className="mt-1 text-[11px] leading-relaxed text-gray-500">
-              Strong economic data and hawkish Fed sentiment driving USD demand.
-            </p>
-          </div>
-
-          <div className="rounded-md border border-gray-800 bg-gray-950/50 px-2 py-1">
-            <span className="text-[10px] font-semibold text-[var(--accent)]">
-              +82%
+      <div className="grid items-stretch gap-3 xl:grid-cols-4">
+        {/* ================= AI INSIGHTS ================= */}
+        <section className="flex min-w-0 flex-col rounded-lg border border-gray-800 bg-gray-950/40 xl:h-[18rem]">
+          <div className="flex items-center gap-2 border-b border-gray-800 px-3 py-2">
+            <span className="flex h-5 w-5 items-center justify-center rounded-md bg-blue-600 text-[10px] font-bold text-white">
+              5
             </span>
-          </div>
-        </div>
-      </div>
-
-      {/* Top Opportunity */}
-      <div className="rounded-lg border border-gray-800 bg-gray-900/70 p-3">
-        <div className="flex items-start justify-between">
-          <div>
-            <p className="text-[11px] font-medium uppercase tracking-wide text-gray-400">
-              Top Opportunity
-            </p>
-
-            <h3 className="mt-1.5 text-lg font-semibold text-white">
-              USD/JPY
-            </h3>
-
-            <p className="mt-1 text-[11px] leading-relaxed text-gray-500">
-              Strong momentum with breakout above major resistance zone.
-            </p>
+            <h2 className="truncate text-xs font-semibold text-white">
+              AI Insights & Opportunities
+            </h2>
           </div>
 
-          <div className="text-right">
-            <p className="text-[10px] text-gray-500">R:R</p>
-            <p className="text-sm font-semibold text-white">1 : 3.4</p>
-          </div>
-        </div>
-
-        <div className="mt-4">
-          <div className="flex items-center justify-between text-[10px] text-gray-500">
-            <span>Opportunity Score</span>
-            <span>91/100</span>
-          </div>
-
-          <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-gray-800">
-            <div className="h-full w-[91%] rounded-full bg-[var(--accent)]" />
-          </div>
-        </div>
-      </div>
-
-      {/* Smart Alerts */}
-      <div className="rounded-lg border border-gray-800 bg-gray-900/70 p-3">
-        <div className="flex items-center justify-between">
-          <p className="text-[11px] font-medium uppercase tracking-wide text-gray-400">
-            Smart Alerts
-          </p>
-
-          <span className="rounded-md border border-gray-800 bg-gray-950/50 px-2 py-1 text-[10px] font-medium text-gray-400">
-            LIVE
-          </span>
-        </div>
-
-        <div className="mt-3 grid gap-2">
-          {aiInsights.map((alert, index) => (
-            <div
-              key={index}
-              className="flex items-start gap-2 rounded-md border border-gray-800 bg-gray-950/50 p-2.5"
-            >
-              <div className="mt-1 h-1.5 w-1.5 rounded-full bg-[var(--accent)]" />
-
-              <div className="flex-1">
-                <p className="text-xs text-gray-300">{alert}</p>
-
-                <p className="mt-1 text-[10px] text-gray-500">
-                  {index + 2} min ago
-                </p>
+          <div className="grid grid-cols-2 gap-2 p-3">
+            <div className="rounded-md border border-gray-800 bg-gray-900/70 p-2">
+              <p className="text-[9px] uppercase tracking-wide text-gray-500">
+                Market Bias
+              </p>
+              <div className="mt-2 flex items-center gap-2">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-green-500/20 text-sm font-semibold text-green-400">
+                  $
+                </div>
+                <div className="min-w-0">
+                  <p className="truncate text-[11px] font-semibold text-green-400">
+                    USD BULLISH
+                  </p>
+                  <p className="mt-0.5 line-clamp-2 text-[9px] leading-tight text-gray-500">
+                    Strong economic data and hawkish Fed sentiment.
+                  </p>
+                </div>
               </div>
             </div>
-          ))}
-        </div>
-      </div>
-    </div>
 
-    <div className="mt-4 flex justify-end">
-      <Link
-        href="/alerts"
-        className="text-xs font-medium text-[var(--accent)] transition hover:text-white"
-      >
-        View all alerts →
-      </Link>
-    </div>
-  </section>
-
-  {/* ================= PORTFOLIO OVERVIEW ================= */}
-  <section className="rounded-lg border border-gray-800 bg-gray-950/40 p-4">
-    <div className="flex items-start justify-between">
-      <div>
-        <div className="flex items-center gap-2">
-          <h2 className="text-sm font-semibold tracking-wide text-white">
-            Portfolio Overview
-          </h2>
-        </div>
-
-        <p className="mt-2 text-[11px] text-gray-500">
-          Financial health, exposure and risk monitoring.
-        </p>
-      </div>
-    </div>
-
-    <div className="mt-4 grid gap-3">
-      <div className="rounded-lg border border-gray-800 bg-gray-900/70 p-3">
-        <p className="text-[11px] uppercase tracking-wide text-gray-400">
-          Account Balance
-        </p>
-
-        <h3 className="mt-1.5 text-xl font-semibold text-white">
-          ${accountBalance.toLocaleString()}
-        </h3>
-
-        <p className="mt-1 text-[11px] text-green-400">
-          +$352.18 Today
-        </p>
-      </div>
-
-      <div className="rounded-lg border border-gray-800 bg-gray-900/70 p-3">
-        <p className="text-[11px] uppercase tracking-wide text-gray-400">
-          Equity
-        </p>
-
-        <h3 className="mt-1.5 text-xl font-semibold text-white">
-          ${equity.toFixed(2)}
-        </h3>
-
-        <p className="mt-1 text-[11px] text-green-400">
-          +5.21% Weekly
-        </p>
-      </div>
-    </div>
-
-    {/* Margin */}
-    <div className="mt-3 rounded-lg border border-gray-800 bg-gray-900/70 p-3">
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-[11px] uppercase tracking-wide text-gray-400">
-            Margin Health
-          </p>
-
-          <h3 className="mt-1.5 text-base font-semibold text-[var(--accent)]">
-            SAFE
-          </h3>
-        </div>
-
-        <div className="text-right">
-          <p className="text-[10px] text-gray-500">Margin Level</p>
-          <p className="text-lg font-semibold text-white">
-            {marginUsage.toFixed(0)}%
-          </p>
-        </div>
-      </div>
-
-      <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-gray-800">
-        <div className="h-full w-[68%] rounded-full bg-[var(--accent)]" />
-      </div>
-    </div>
-
-    {/* Exposure */}
-    <div className="mt-3 rounded-lg border border-gray-800 bg-gray-900/70 p-3">
-      <div className="flex items-center justify-between">
-        <p className="text-[11px] uppercase tracking-wide text-gray-400">
-          Exposure By Currency
-        </p>
-
-        <p className="text-xs font-semibold text-white">
-          USD {usdExposurePercent.toFixed(0)}%
-        </p>
-      </div>
-
-      <div className="mt-3 grid gap-2">
-        {[
-          { pair: "USD", value: 42, color: "bg-blue-500" },
-          { pair: "EUR", value: 18, color: "bg-green-500" },
-          { pair: "GBP", value: 16, color: "bg-yellow-500" },
-          { pair: "JPY", value: 12, color: "bg-red-500" },
-        ].map((item) => (
-          <div key={item.pair}>
-            <div className="mb-1 flex items-center justify-between text-[11px]">
-              <span className="text-gray-400">{item.pair}</span>
-              <span className="text-white">{item.value}%</span>
-            </div>
-
-            <div className="h-1.5 overflow-hidden rounded-full bg-gray-800">
-              <div
-                className={`h-full rounded-full ${item.color}`}
-                style={{ width: `${item.value}%` }}
-              />
+            <div className="rounded-md border border-gray-800 bg-gray-900/70 p-2">
+              <p className="text-[9px] uppercase tracking-wide text-gray-500">
+                Top Opportunity
+              </p>
+              <div className="mt-2 flex items-center gap-2">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--accent-soft)] text-xs font-semibold text-[var(--accent)]">
+                  ↗
+                </div>
+                <div className="min-w-0">
+                  <p className="truncate text-[11px] font-semibold text-[var(--accent)]">
+                    USD/JPY
+                  </p>
+                  <p className="mt-0.5 line-clamp-2 text-[9px] leading-tight text-gray-500">
+                    Strong momentum with breakout above resistance.
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
-        ))}
-      </div>
-    </div>
 
-    {/* Drawdown */}
-    <div className="mt-3 rounded-lg border border-gray-800 bg-gray-900/70 p-3">
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-[11px] uppercase tracking-wide text-gray-400">
-            Drawdown
-          </p>
-
-          <h3 className="mt-1.5 text-base font-semibold text-red-400">
-            -{drawdownPercent.toFixed(1)}%
-          </h3>
-        </div>
-
-        <span className="rounded-md border border-red-400/20 bg-gray-950/50 px-2 py-1 text-[10px] font-medium text-red-400">
-          Moderate Risk
-        </span>
-      </div>
-    </div>
-
-    <div className="mt-4 flex justify-end">
-      <Link
-        href="/portfolio"
-        className="text-xs font-medium text-[var(--accent)] transition hover:text-white"
-      >
-        View full portfolio →
-      </Link>
-    </div>
-  </section>
-
-  {/* ================= SENTIMENT & NEWS ================= */}
-  <section className="rounded-lg border border-gray-800 bg-gray-950/40 p-4">
-    <div className="flex items-start justify-between">
-      <div>
-        <div className="flex items-center gap-2">
-          <h2 className="text-sm font-semibold tracking-wide text-white">
-            Sentiment & News
-          </h2>
-        </div>
-
-        <p className="mt-2 text-[11px] text-gray-500">
-          Market psychology and real-time macro news.
-        </p>
-      </div>
-    </div>
-
-    <div className="mt-4 grid gap-3">
-      {/* Positioning */}
-      <div className="rounded-lg border border-gray-800 bg-gray-900/70 p-3">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-[11px] uppercase tracking-wide text-gray-400">
-              Retail Trader Positioning
-            </p>
-
-            <h3 className="mt-2 text-lg font-bold text-white">
-              EUR/USD
-            </h3>
-
-            <p className="mt-1 text-[11px] text-gray-500">
-              Retail traders heavily long on EUR/USD.
-            </p>
-          </div>
-
-          <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full border-2 border-[var(--border-soft)] text-center">
-            <div>
-              <p className="text-base font-semibold text-[var(--accent)]">78%</p>
-              <p className="text-[10px] text-gray-400">LONG</p>
+          <div className="flex min-h-0 flex-1 flex-col px-3 pb-3">
+            <div className="mb-2 flex items-center justify-between">
+              <p className="text-[10px] font-semibold text-gray-300">
+                Smart Alerts
+              </p>
+              <span className="text-[9px] text-gray-500">LIVE</span>
+            </div>
+            <div className="min-h-0 space-y-2 overflow-hidden">
+              {[
+                "EUR/USD approaching major resistance at 1.0900",
+                "GBP/USD volatility spike detected",
+                "USD/JPY bullish momentum increasing",
+                "AUD/USD nearing trendline support",
+              ].map((alert, index) => (
+                <div key={alert} className="flex items-center gap-2 text-[10px]">
+                  <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-yellow-400" />
+                  <span className="min-w-0 flex-1 truncate text-gray-300">
+                    {alert}
+                  </span>
+                  <span className="shrink-0 text-[9px] text-gray-500">
+                    {index * 6 + 5}m ago
+                  </span>
+                </div>
+              ))}
             </div>
           </div>
-        </div>
-      </div>
 
-      {/* Sentiment */}
-      <div className="rounded-lg border border-gray-800 bg-gray-900/70 p-3">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-[11px] uppercase tracking-wide text-gray-400">
-              News Sentiment
-            </p>
-
-            <h3 className="mt-2 text-lg font-bold text-green-400">
-              Positive
-            </h3>
-
-            <p className="mt-1 text-[11px] text-gray-500">
-              Mostly positive macroeconomic sentiment across markets.
-            </p>
-          </div>
-
-          <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full border-2 border-[var(--border-soft)]">
-            <div className="text-center">
-              <p className="text-base font-semibold text-[var(--accent)]">68</p>
-              <p className="text-[10px] text-gray-400">/100</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* News */}
-      <div className="rounded-lg border border-gray-800 bg-gray-900/70 p-3">
-        <div className="flex items-center justify-between">
-          <p className="text-[11px] uppercase tracking-wide text-gray-400">
-            Top News
-          </p>
-
-          <span className="text-[10px] text-red-400">
-            LIVE
-          </span>
-        </div>
-
-        <div className="mt-3 space-y-2">
-          {newsItems.slice(0, 3).map((news, index) => (
+          <div className="border-t border-gray-900 px-3 py-2 text-right">
             <Link
-              key={index}
-              href={news.link || "#"}
-              className="block rounded-md border border-gray-800 bg-gray-950/50 p-2.5 transition hover:border-gray-700"
+              href="/alerts"
+              className="text-[10px] font-medium text-[var(--accent)] transition hover:text-white"
             >
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <p className="text-xs font-medium text-gray-200">
-                    {news.title}
-                  </p>
-
-                  <p className="mt-1 text-[10px] text-gray-500">
-                    {index + 1}h ago
-                  </p>
-                </div>
-
-                <span className="rounded-full bg-red-500/10 px-2 py-1 text-[10px] font-medium text-red-400">
-                  HIGH
-                </span>
-              </div>
+              View all alerts →
             </Link>
-          ))}
-        </div>
-      </div>
-    </div>
+          </div>
+        </section>
 
-    <div className="mt-4 flex justify-end">
-      <Link
-        href="/news"
-        className="text-xs font-medium text-[var(--accent)] transition hover:text-white"
-      >
-        View all news →
-      </Link>
-    </div>
-  </section>
-
-  {/* ================= MARKET MOVERS ================= */}
-  <section className="rounded-lg border border-gray-800 bg-gray-950/40 p-4">
-    <div className="flex items-start justify-between">
-      <div>
-        <div className="flex items-center gap-2">
-          <h2 className="text-sm font-semibold tracking-wide text-white">
-            Market Movers
-          </h2>
-        </div>
-
-        <p className="mt-2 text-[11px] text-gray-500">
-          Biggest gainers, losers and momentum opportunities.
-        </p>
-      </div>
-    </div>
-
-    <div className="mt-4 grid gap-3">
-      {[
-        { title: "Top Gainers", rows: gainers },
-        { title: "Top Losers", rows: losers },
-        { title: "Most Volatile", rows: mostVolatile },
-      ].map((group) => (
-        <div
-          key={group.title}
-          className="rounded-lg border border-gray-800 bg-gray-900/70 p-3"
-        >
-          <div className="flex items-center justify-between">
-            <h3 className="text-sm font-semibold text-white">
-              {group.title}
-            </h3>
-
-            <span className="text-[10px] text-gray-500">
-              LIVE
+        {/* ================= PORTFOLIO OVERVIEW ================= */}
+        <section className="flex min-w-0 flex-col rounded-lg border border-gray-800 bg-gray-950/40 xl:h-[18rem]">
+          <div className="flex items-center gap-2 border-b border-gray-800 px-3 py-2">
+            <span className="flex h-5 w-5 items-center justify-center rounded-md bg-blue-600 text-[10px] font-bold text-white">
+              6
             </span>
+            <h2 className="truncate text-xs font-semibold text-white">
+              Portfolio Overview
+            </h2>
           </div>
 
-          <div className="mt-3 space-y-2">
-            {group.rows.map((row) => (
-              <div
-                key={row.pair}
-                className="rounded-md border border-gray-800 bg-gray-950/50 p-2.5"
-              >
-                <div className="flex items-center justify-between">
+          <div className="grid grid-cols-2 gap-2 p-3">
+            <div>
+              <p className="text-[9px] text-gray-500">Account Balance</p>
+              <p className="mt-1 truncate text-sm font-semibold text-white">
+                ${accountBalance.toLocaleString()}
+              </p>
+              <p className="mt-1 text-[10px] text-green-400">
+                +$352.18 (1.33%)
+              </p>
+            </div>
+            <div>
+              <p className="text-[9px] text-gray-500">Equity</p>
+              <p className="mt-1 truncate text-sm font-semibold text-white">
+                ${equity.toFixed(2)}
+              </p>
+              <p className="mt-1 text-[10px] text-green-400">
+                +$1,258.74 (5.21%)
+              </p>
+            </div>
+          </div>
+
+          <div className="grid min-h-0 flex-1 grid-cols-[0.95fr_1.05fr] gap-3 px-3 pb-3">
+            <div className="min-w-0">
+              <p className="mb-2 text-[10px] font-semibold text-gray-300">
+                Margin Overview
+              </p>
+              <div className="relative mx-auto h-24 w-24 rounded-full bg-[conic-gradient(#22c55e_0deg_245deg,#1f2937_245deg_360deg)]">
+                <div className="absolute inset-3 rounded-full bg-gray-950" />
+                <div className="absolute inset-0 flex items-center justify-center text-center">
                   <div>
-                    <p className="text-sm font-semibold text-white">
-                      {row.pair}
-                    </p>
-
-                    <p className="mt-1 text-[10px] text-gray-500">
-                      Momentum Score: {Math.floor(
-                        Math.random() * 15 + 80
-                      )}
-                    </p>
-                  </div>
-
-                  <div className="text-right">
-                    <p
-                      className={`text-sm font-bold ${
-                        row.change > 0
-                          ? "text-green-400"
-                          : "text-red-400"
-                      }`}
-                    >
-                      {row.change > 0 ? "+" : ""}
-                      {row.change.toFixed(2)}%
-                    </p>
-
-                    <p className="mt-1 text-[10px] text-gray-500">
-                      Volatility High
+                    <p className="text-[9px] text-gray-400">Margin</p>
+                    <p className="text-[9px] text-gray-400">Used</p>
+                    <p className="text-[10px] font-semibold text-white">
+                      ${Math.max(0, exposureNotional / 50).toFixed(2)}
                     </p>
                   </div>
                 </div>
+              </div>
+            </div>
 
-                <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-gray-800">
-                  <div
-                    className={`h-full rounded-full ${
-                      row.change > 0
-                        ? "bg-green-500"
-                        : "bg-red-500"
-                    }`}
-                    style={{
-                      width: `${Math.min(
-                        Math.abs(row.change) * 20,
-                        100
-                      )}%`,
-                    }}
-                  />
+            <div className="min-w-0">
+              <p className="mb-2 text-[10px] font-semibold text-gray-300">
+                Exposure By Currency
+              </p>
+              {[
+                { pair: "USD", value: 42, color: "bg-blue-500" },
+                { pair: "EUR", value: 18, color: "bg-blue-500" },
+                { pair: "GBP", value: 16, color: "bg-red-400" },
+                { pair: "JPY", value: 12, color: "bg-green-500" },
+                { pair: "AUD", value: 7, color: "bg-green-500" },
+                { pair: "Others", value: 5, color: "bg-gray-500" },
+              ].map((item) => (
+                <div key={item.pair} className="mb-1.5 grid grid-cols-[2rem_1fr_2rem] items-center gap-2 text-[9px]">
+                  <span className="truncate text-gray-400">{item.pair}</span>
+                  <div className="h-1.5 overflow-hidden rounded-full bg-gray-800">
+                    <div
+                      className={`h-full rounded-full ${item.color}`}
+                      style={{ width: `${item.value}%` }}
+                    />
+                  </div>
+                  <span className="text-right text-gray-300">{item.value}%</span>
                 </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="border-t border-gray-900 px-3 py-2 text-right">
+            <Link
+              href="/portfolio"
+              className="text-[10px] font-medium text-[var(--accent)] transition hover:text-white"
+            >
+              View full portfolio →
+            </Link>
+          </div>
+        </section>
+
+        {/* ================= SENTIMENT & NEWS ================= */}
+        <section className="flex min-w-0 flex-col rounded-lg border border-gray-800 bg-gray-950/40 xl:h-[18rem]">
+          <div className="flex items-center gap-2 border-b border-gray-800 px-3 py-2">
+            <span className="flex h-5 w-5 items-center justify-center rounded-md bg-blue-600 text-[10px] font-bold text-white">
+              7
+            </span>
+            <h2 className="truncate text-xs font-semibold text-white">
+              Sentiment & News
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-2 gap-2 p-3 pb-2">
+            <div className="rounded-md border border-gray-800 bg-gray-900/70 p-2">
+              <p className="text-[9px] text-gray-500">
+                Retail Trader Positioning
+              </p>
+              <p className="text-[10px] font-medium text-gray-300">EUR/USD</p>
+              <div className="mt-1 flex min-w-0 items-center justify-center gap-1">
+                <div className="text-right">
+                  <p className="text-[11px] font-semibold text-green-400">78%</p>
+                  <p className="text-[8px] text-green-400">LONG</p>
+                </div>
+                <div className="h-12 w-12 shrink-0 rounded-full bg-[conic-gradient(#22c55e_0deg_280deg,#ef4444_280deg_360deg)] p-1.5 2xl:h-14 2xl:w-14">
+                  <div className="h-full w-full rounded-full bg-gray-950" />
+                </div>
+                <div>
+                  <p className="text-[11px] font-semibold text-red-400">22%</p>
+                  <p className="text-[8px] text-red-400">SHORT</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="rounded-md border border-gray-800 bg-gray-900/70 p-2">
+              <p className="text-[9px] text-gray-500">News Sentiment</p>
+              <p className="text-[10px] font-medium text-gray-300">
+                Overall Market
+              </p>
+              <div className="mt-1 flex items-center justify-center">
+                <div className="relative h-14 w-20 overflow-hidden 2xl:w-24">
+                  <div className="absolute inset-x-0 top-0 h-20 rounded-full bg-[conic-gradient(#22c55e_0deg_122deg,#1f2937_122deg_180deg)] 2xl:h-24" />
+                  <div className="absolute inset-x-3 top-3 h-16 rounded-full bg-gray-950 2xl:h-20" />
+                  <div className="absolute inset-x-0 bottom-0 text-center">
+                    <p className="text-[11px] font-semibold text-green-400">
+                      Positive
+                    </p>
+                    <p className="text-[9px] text-gray-400">68/100</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="min-h-0 flex-1 px-3 pb-2">
+            <p className="mb-2 text-[10px] font-semibold text-gray-300">
+              Top News
+            </p>
+            <div className="space-y-2 overflow-hidden">
+              {(newsItems.length ? newsItems : [
+                { title: "Fed officials signal rate cuts later this year" },
+                { title: "ECB holds rates steady, outlook unchanged" },
+                { title: "Japan inflation slows, BOJ in focus" },
+                { title: "UK wage growth risks more than expected" },
+              ])
+                .slice(0, 4)
+                .map((news, index) => (
+                  <div key={`${news.title}-${index}`} className="flex items-center gap-2 text-[10px]">
+                    <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-red-400" />
+                    <span className="min-w-0 flex-1 truncate text-gray-300">
+                      {news.title}
+                    </span>
+                    <span className="shrink-0 text-[9px] text-gray-500">
+                      {index + 1}h ago
+                    </span>
+                  </div>
+                ))}
+            </div>
+          </div>
+
+          <div className="border-t border-gray-900 px-3 py-2 text-right">
+            <Link
+              href="/news"
+              className="text-[10px] font-medium text-[var(--accent)] transition hover:text-white"
+            >
+              View all news →
+            </Link>
+          </div>
+        </section>
+
+        {/* ================= MARKET MOVERS ================= */}
+        <section className="flex min-w-0 flex-col rounded-lg border border-gray-800 bg-gray-950/40 xl:h-[18rem]">
+          <div className="border-b border-gray-800 px-3 py-2">
+            <h2 className="truncate text-xs font-semibold text-white">
+              Market Movers
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-3 gap-1 px-3 pt-3 text-center text-[9px]">
+            {["Top Gainers", "Top Losers", "Most Volatile"].map((tab, index) => (
+              <div
+                key={tab}
+                className={`rounded px-2 py-1 ${
+                  index === 0
+                    ? "bg-blue-500/20 text-blue-300"
+                    : "text-gray-500"
+                }`}
+              >
+                {tab}
               </div>
             ))}
           </div>
-        </div>
-      ))}
-    </div>
-  </section>
-</div>
+
+          <div className="min-h-0 flex-1 px-3 py-3">
+            <div className="space-y-2 overflow-hidden">
+              {(gainers.length ? gainers : majorPairRows).slice(0, 5).map((row) => (
+                <div key={row.pair} className="grid grid-cols-[3rem_3.1rem_minmax(2rem,1fr)_2.6rem] items-center gap-1.5 text-[10px]">
+                  <span className="truncate font-medium text-gray-200">
+                    {row.pair}
+                  </span>
+                  <span className="truncate font-mono text-gray-300">
+                    {row.price
+                      ? Number(row.price).toFixed(row.pair.includes("JPY") ? 3 : 5)
+                      : "..."}
+                  </span>
+                  <svg
+                    className="h-5 min-w-0"
+                    viewBox="0 0 72 24"
+                    aria-hidden="true"
+                  >
+                    {row.sparkline ? (
+                      <polyline
+                        fill="none"
+                        points={row.sparkline}
+                        stroke="#22c55e"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    ) : (
+                      <polyline
+                        fill="none"
+                        points="0,16 12,14 24,17 36,10 48,12 60,6 72,8"
+                        stroke="#22c55e"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    )}
+                  </svg>
+                  <span className="text-right font-semibold text-green-400">
+                    +{Math.abs(row.change || 0.28).toFixed(2)}%
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="border-t border-gray-900 px-3 py-2 text-right">
+            <Link
+              href="/markets"
+              className="text-[10px] font-medium text-[var(--accent)] transition hover:text-white"
+            >
+              View market movers →
+            </Link>
+          </div>
+        </section>
+      </div>
     </div>
   );
 }
