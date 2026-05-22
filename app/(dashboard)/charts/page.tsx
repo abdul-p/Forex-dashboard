@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   Activity,
   BarChart3,
@@ -17,15 +17,7 @@ import {
   TrendingUp,
   X,
 } from "lucide-react";
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-} from "recharts";
+import MainChartEngine, { type ChartCandle } from "@/components/MainChartEngine";
 
 const PAIRS = [
   "EUR/USD",
@@ -55,7 +47,7 @@ const CHART_TYPES = [
   { label: "Heikin Ashi", icon: BarChart3 },
 ];
 
-const INDICATORS = ["RSI", "MACD", "EMA", "Bollinger Bands"];
+const INDICATORS = ["EMA 20", "EMA 50", "VWAP", "RSI", "MACD"];
 
 const DRAWING_TOOLS = [
   { label: "Trendline", icon: PenLine },
@@ -72,29 +64,24 @@ interface Candle {
   close: string;
 }
 
-interface ChartPoint {
-  time: string;
-  price: number;
-  open: number;
-  high: number;
-  low: number;
-}
-
 export default function ChartsPage() {
   const [selectedPair, setSelectedPair] = useState("EUR/USD");
   const [selectedInterval, setSelectedInterval] = useState("1h");
   const [pairSearch, setPairSearch] = useState("EUR/USD");
   const [pairDropdownOpen, setPairDropdownOpen] = useState(false);
-  const [chartType, setChartType] = useState("Line");
+  const [chartType, setChartType] = useState("Candlestick");
   const [indicatorModalOpen, setIndicatorModalOpen] = useState(false);
-  const [activeIndicators, setActiveIndicators] = useState<string[]>(["EMA"]);
+  const [activeIndicators, setActiveIndicators] = useState<string[]>([
+    "EMA 20",
+    "EMA 50",
+    "RSI",
+  ]);
   const [activeDrawingTool, setActiveDrawingTool] = useState("Trendline");
   const [splitCharts, setSplitCharts] = useState(false);
   const [fullscreen, setFullscreen] = useState(false);
   const [layoutSaved, setLayoutSaved] = useState(false);
-  const [chartData, setChartData] = useState<ChartPoint[]>([]);
+  const [chartData, setChartData] = useState<ChartCandle[]>([]);
   const [loading, setLoading] = useState(true);
-  const [currentPrice, setCurrentPrice] = useState<string | null>(null);
 
   const filteredPairs = PAIRS.filter((pair) =>
     pair.toLowerCase().includes(pairSearch.toLowerCase()),
@@ -128,53 +115,84 @@ export default function ChartsPage() {
     });
   };
 
-  const fetchChartData = async () => {
-    setLoading(true);
-    try {
-      const res = await fetch(
-        `/api/market/timeseries?symbol=${encodeURIComponent(selectedPair)}&interval=${selectedInterval}`,
-      );
-      const data = await res.json();
-
-      if (data.values) {
-        const formatted: ChartPoint[] = data.values
-          .slice()
-          .reverse()
-          .map((candle: Candle) => ({
-            time: formatTime(candle.datetime, selectedInterval),
-            price: parseFloat(candle.close),
-            open: parseFloat(candle.open),
-            high: parseFloat(candle.high),
-            low: parseFloat(candle.low),
-          }));
-
-        setChartData(formatted);
-        setCurrentPrice(
-          formatted[formatted.length - 1]?.price.toFixed(5) || null,
-        );
-      }
-    } catch (error) {
-      console.error("Failed to fetch chart data:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const toTimestamp = (datetime: string) =>
+    Math.floor(new Date(datetime).getTime() / 1000) as ChartCandle["time"];
 
   useEffect(() => {
-    fetchChartData();
+    let active = true;
+
+    const fetchChartData = async () => {
+      await Promise.resolve();
+      if (!active) {
+        return;
+      }
+
+      setLoading(true);
+      try {
+        const res = await fetch(
+          `/api/market/timeseries?symbol=${encodeURIComponent(selectedPair)}&interval=${selectedInterval}`,
+        );
+        const data = await res.json();
+
+        if (active && data.values) {
+          const formatted: ChartCandle[] = data.values
+            .slice()
+            .reverse()
+            .map((candle: Candle) => ({
+              time: toTimestamp(candle.datetime),
+              label: formatTime(candle.datetime, selectedInterval),
+              open: parseFloat(candle.open),
+              high: parseFloat(candle.high),
+              low: parseFloat(candle.low),
+              close: parseFloat(candle.close),
+            }));
+
+          setChartData(formatted);
+        }
+      } catch (error) {
+        console.error("Failed to fetch chart data:", error);
+      } finally {
+        if (active) {
+          setLoading(false);
+        }
+      }
+    };
+
+    void fetchChartData();
+
+    return () => {
+      active = false;
+    };
   }, [selectedPair, selectedInterval]);
+
+  const handleLiveCandle = useCallback((nextCandle: ChartCandle) => {
+    setChartData((current) => {
+      const existingIndex = current.findIndex(
+        (candle) => candle.time === nextCandle.time,
+      );
+
+      return existingIndex >= 0
+        ? current.map((candle, index) =>
+            index === existingIndex ? nextCandle : candle,
+          )
+        : [...current, nextCandle]
+            .sort((first, second) => first.time - second.time)
+            .slice(-500);
+    });
+  }, []);
 
   const priceChange =
     chartData.length > 1
-      ? chartData[chartData.length - 1].price - chartData[0].price
+      ? chartData[chartData.length - 1].close - chartData[0].close
       : 0;
 
   const priceChangePercent =
     chartData.length > 1
-      ? ((priceChange / chartData[0].price) * 100).toFixed(3)
+      ? ((priceChange / chartData[0].close) * 100).toFixed(3)
       : "0.000";
 
   const isPositive = priceChange >= 0;
+  const currentPrice = chartData[chartData.length - 1]?.close.toFixed(5) || null;
 
   return (
     <div className="space-y-6">
@@ -373,15 +391,13 @@ export default function ChartsPage() {
         </div>
       </div>
 
-      {/* Chart Card */}
-      <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
-        {/* Chart Header */}
-        <div className="flex items-start justify-between mb-6">
+      <div className="rounded-lg border border-gray-800 bg-gray-950/40 p-4">
+        <div className="mb-4 flex flex-wrap items-start justify-between gap-4">
           <div>
-            <h2 className="text-xl font-bold text-white">{selectedPair}</h2>
+            <p className="text-xs text-gray-500">Current Price</p>
             {currentPrice && (
-              <div className="flex items-center gap-3 mt-1">
-                <span className="text-3xl font-bold text-white font-mono">
+              <div className="mt-1 flex items-center gap-3">
+                <span className="font-mono text-3xl font-bold text-white">
                   {currentPrice}
                 </span>
                 <span
@@ -396,63 +412,25 @@ export default function ChartsPage() {
           </div>
 
           <div className="text-right">
-            <p className="text-xs text-gray-500">Mode</p>
-            <p className="text-sm font-semibold text-white">{chartType}</p>
+            <p className="text-xs text-gray-500">Engine</p>
+            <p className="text-sm font-semibold text-white">
+              TradingView Lightweight Charts
+            </p>
             <p className="mt-1 text-[11px] text-gray-500">
               {activeIndicators.join(", ") || "No indicators"}
             </p>
           </div>
         </div>
 
-        {/* Chart */}
-        {loading ? (
-          <div className="h-80 flex items-center justify-center text-gray-600">
-            Loading chart data...
-          </div>
-        ) : chartData.length === 0 ? (
-          <div className="h-80 flex items-center justify-center text-gray-600">
-            No data available
-          </div>
-        ) : (
-          <ResponsiveContainer width="100%" height={320}>
-            <LineChart data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" />
-              <XAxis
-                dataKey="time"
-                tick={{ fill: "#4b5563", fontSize: 11 }}
-                tickLine={false}
-                axisLine={false}
-                interval="preserveStartEnd"
-              />
-              <YAxis
-                tick={{ fill: "#4b5563", fontSize: 11 }}
-                tickLine={false}
-                axisLine={false}
-                domain={["auto", "auto"]}
-                tickFormatter={(val) => val.toFixed(4)}
-                width={70}
-              />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: "#111827",
-                  border: "1px solid #1f2937",
-                  borderRadius: "12px",
-                  color: "#fff",
-                }}
-                formatter={(value) => [Number(value).toFixed(5), "Price"]}
-                labelStyle={{ color: "#6b7280" }}
-              />
-              <Line
-                type="monotone"
-                dataKey="price"
-                stroke={isPositive ? "var(--accent)" : "#f87171"}
-                strokeWidth={2}
-                dot={false}
-                activeDot={{ r: 4, fill: isPositive ? "var(--accent)" : "#f87171" }}
-              />
-            </LineChart>
-          </ResponsiveContainer>
-        )}
+        <MainChartEngine
+          candles={chartData}
+          selectedPair={selectedPair}
+          selectedInterval={selectedInterval}
+          chartType={chartType}
+          activeIndicators={activeIndicators}
+          loading={loading}
+          onLiveCandle={handleLiveCandle}
+        />
       </div>
 
       {indicatorModalOpen && (
@@ -477,7 +455,7 @@ export default function ChartsPage() {
               </button>
             </div>
             <div className="grid gap-2 p-4">
-              {INDICATORS.map((indicator) => (
+            {INDICATORS.map((indicator) => (
                 <label
                   key={indicator}
                   className="flex cursor-pointer items-center justify-between rounded-md border border-gray-800 bg-gray-900/70 px-3 py-2 text-sm text-gray-300"
@@ -500,10 +478,10 @@ export default function ChartsPage() {
       {chartData.length > 0 && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[
-            { label: "Open", value: chartData[0]?.price.toFixed(5) },
+            { label: "Open", value: chartData[0]?.open.toFixed(5) },
             {
               label: "Current",
-              value: chartData[chartData.length - 1]?.price.toFixed(5),
+              value: chartData[chartData.length - 1]?.close.toFixed(5),
             },
             {
               label: "High",
@@ -516,7 +494,7 @@ export default function ChartsPage() {
           ].map((stat) => (
             <div
               key={stat.label}
-              className="bg-gray-900 border border-gray-800 rounded-2xl p-4"
+              className="rounded-lg border border-gray-800 bg-gray-900 p-4"
             >
               <p className="text-gray-500 text-xs mb-1">{stat.label}</p>
               <p className="text-white font-bold font-mono">{stat.value}</p>
