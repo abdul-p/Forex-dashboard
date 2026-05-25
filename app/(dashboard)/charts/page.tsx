@@ -18,6 +18,10 @@ import {
   X,
 } from "lucide-react";
 import MainChartEngine, { type ChartCandle } from "@/components/MainChartEngine";
+import MarketDataPanel from "@/components/charts/MarketDataPanel";
+import TechnicalAnalysisPanel from "@/components/charts/TechnicalAnalysisPanel";
+import TradeExecutionPanel from "@/components/charts/TradeExecutionPanel";
+import OpenPositionsPanel from "@/components/charts/OpenPositionsPanel";
 
 const PAIRS = [
   "EUR/USD",
@@ -195,18 +199,11 @@ export default function ChartsPage() {
   const currentPrice = chartData[chartData.length - 1]?.close.toFixed(5) || null;
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-white">Charts</h1>
-        <p className="text-gray-500 text-sm mt-1">
-          Live price charts for major forex pairs
-        </p>
-      </div>
-
+    <div className="flex flex-col h-[calc(100vh-theme(spacing.16))] space-y-4 pt-2 pb-4">
       {/* Top Toolbar */}
-      <div className="rounded-lg border border-gray-800 bg-gray-950/40">
+      <div className="shrink-0 rounded-lg border border-gray-800 bg-gray-950/40">
         <div className="grid gap-3 p-3 xl:grid-cols-[minmax(13rem,1.2fr)_auto_auto_auto_auto]">
+          {/* Pair Selector */}
           <div className="relative min-w-0">
             <label className="mb-1 block text-[10px] font-semibold uppercase tracking-wide text-gray-500">
               Pair
@@ -247,7 +244,7 @@ export default function ChartsPage() {
                     >
                       <span>{pair}</span>
                       {selectedPair === pair && (
-                        <span className="h-1.5 w-1.5 rounded-full bg-[var(--accent)]" />
+                        <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
                       )}
                     </button>
                   ))
@@ -260,6 +257,7 @@ export default function ChartsPage() {
             )}
           </div>
 
+          {/* Timeframe Selector */}
           <div>
             <p className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-gray-500">
               Timeframe
@@ -271,7 +269,7 @@ export default function ChartsPage() {
                   onClick={() => setSelectedInterval(interval.value)}
                   className={`min-w-9 px-2 text-xs font-semibold transition ${
                     selectedInterval === interval.value
-                      ? "bg-[var(--accent)] text-gray-950"
+                      ? "bg-emerald-500/20 text-emerald-400"
                       : "text-gray-500 hover:bg-gray-800 hover:text-white"
                   }`}
                 >
@@ -281,6 +279,7 @@ export default function ChartsPage() {
             </div>
           </div>
 
+          {/* Chart Type Selector */}
           <div>
             <p className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-gray-500">
               Chart Type
@@ -296,7 +295,7 @@ export default function ChartsPage() {
                     onClick={() => setChartType(type.label)}
                     className={`flex min-w-10 items-center justify-center px-2 transition ${
                       chartType === type.label
-                        ? "bg-[var(--accent)] text-gray-950"
+                        ? "bg-emerald-500/20 text-emerald-400"
                         : "text-gray-500 hover:bg-gray-800 hover:text-white"
                     }`}
                   >
@@ -307,6 +306,7 @@ export default function ChartsPage() {
             </div>
           </div>
 
+          {/* Indicators Button */}
           <div>
             <p className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-gray-500">
               Indicators
@@ -321,6 +321,7 @@ export default function ChartsPage() {
             </button>
           </div>
 
+          {/* Layout Controls */}
           <div>
             <p className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-gray-500">
               Layout
@@ -332,7 +333,7 @@ export default function ChartsPage() {
                 onClick={() => setFullscreen((value) => !value)}
                 className={`flex min-w-10 items-center justify-center px-2 transition ${
                   fullscreen
-                    ? "bg-[var(--accent)] text-gray-950"
+                    ? "bg-emerald-500/20 text-emerald-400"
                     : "text-gray-500 hover:bg-gray-800 hover:text-white"
                 }`}
               >
@@ -344,7 +345,7 @@ export default function ChartsPage() {
                 onClick={() => setSplitCharts((value) => !value)}
                 className={`flex min-w-10 items-center justify-center px-2 transition ${
                   splitCharts
-                    ? "bg-[var(--accent)] text-gray-950"
+                    ? "bg-emerald-500/20 text-emerald-400"
                     : "text-gray-500 hover:bg-gray-800 hover:text-white"
                 }`}
               >
@@ -356,7 +357,7 @@ export default function ChartsPage() {
                 onClick={() => setLayoutSaved(true)}
                 className={`flex min-w-10 items-center justify-center px-2 transition ${
                   layoutSaved
-                    ? "bg-[var(--accent)] text-gray-950"
+                    ? "bg-emerald-500/20 text-emerald-400"
                     : "text-gray-500 hover:bg-gray-800 hover:text-white"
                 }`}
               >
@@ -366,6 +367,7 @@ export default function ChartsPage() {
           </div>
         </div>
 
+        {/* Drawing Tools */}
         <div className="flex flex-wrap items-center gap-2 border-t border-gray-800 px-3 py-2">
           <span className="text-[10px] font-semibold uppercase tracking-wide text-gray-500">
             Drawing Tools
@@ -379,7 +381,7 @@ export default function ChartsPage() {
                 onClick={() => setActiveDrawingTool(tool.label)}
                 className={`flex items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-xs font-medium transition ${
                   activeDrawingTool === tool.label
-                    ? "border-[var(--border-soft)] bg-[var(--accent-soft)] text-white"
+                    ? "border-emerald-500/50 bg-emerald-500/10 text-emerald-400"
                     : "border-gray-800 bg-gray-900/70 text-gray-500 hover:border-gray-700 hover:text-white"
                 }`}
               >
@@ -391,59 +393,49 @@ export default function ChartsPage() {
         </div>
       </div>
 
-      <div className="rounded-lg border border-gray-800 bg-gray-950/40 p-4">
-        <div className="mb-4 flex flex-wrap items-start justify-between gap-4">
-          <div>
-            <p className="text-xs text-gray-500">Current Price</p>
-            {currentPrice && (
-              <div className="mt-1 flex items-center gap-3">
-                <span className="font-mono text-3xl font-bold text-white">
-                  {currentPrice}
-                </span>
-                <span
-                  className={`text-sm font-medium ${isPositive ? "text-[var(--accent)]" : "text-red-400"}`}
-                >
-                  {isPositive ? "+" : ""}
-                  {priceChange.toFixed(5)} ({isPositive ? "+" : ""}
-                  {priceChangePercent}%)
-                </span>
-              </div>
-            )}
-          </div>
-
-          <div className="text-right">
-            <p className="text-xs text-gray-500">Engine</p>
-            <p className="text-sm font-semibold text-white">
-              TradingView Lightweight Charts
-            </p>
-            <p className="mt-1 text-[11px] text-gray-500">
-              {activeIndicators.join(", ") || "No indicators"}
-            </p>
-          </div>
+      {/* Main Content Layout */}
+      <div className="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-4">
+        {/* Left: Chart Engine */}
+        <div className="flex flex-col min-h-0 rounded-lg border border-gray-800 bg-gray-950/40 p-1">
+          <MainChartEngine
+            candles={chartData}
+            selectedPair={selectedPair}
+            selectedInterval={selectedInterval}
+            chartType={chartType}
+            activeIndicators={activeIndicators}
+            loading={loading}
+            onLiveCandle={handleLiveCandle}
+          />
         </div>
 
-        <MainChartEngine
-          candles={chartData}
-          selectedPair={selectedPair}
-          selectedInterval={selectedInterval}
-          chartType={chartType}
-          activeIndicators={activeIndicators}
-          loading={loading}
-          onLiveCandle={handleLiveCandle}
-        />
+        {/* Right: Side Panels */}
+        <div className="flex flex-col gap-4 overflow-y-auto pr-1">
+          <MarketDataPanel
+            pair={selectedPair}
+            price={currentPrice}
+            changePercent={priceChangePercent}
+            isPositive={isPositive}
+            high={chartData.length > 0 ? Math.max(...chartData.map((d) => d.high)).toFixed(5) : ""}
+            low={chartData.length > 0 ? Math.min(...chartData.map((d) => d.low)).toFixed(5) : ""}
+          />
+          <TechnicalAnalysisPanel />
+          <TradeExecutionPanel />
+        </div>
       </div>
 
+      {/* Bottom: Open Positions */}
+      <div className="shrink-0 h-52">
+        <OpenPositionsPanel />
+      </div>
+
+      {/* Indicator Modal */}
       {indicatorModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
           <div className="w-full max-w-md rounded-lg border border-gray-800 bg-gray-950 shadow-2xl">
             <div className="flex items-center justify-between border-b border-gray-800 px-4 py-3">
               <div>
-                <h2 className="text-sm font-semibold text-white">
-                  Indicators
-                </h2>
-                <p className="text-xs text-gray-500">
-                  Add studies to the active chart.
-                </p>
+                <h2 className="text-sm font-semibold text-white">Indicators</h2>
+                <p className="text-xs text-gray-500">Add studies to the active chart.</p>
               </div>
               <button
                 type="button"
@@ -455,7 +447,7 @@ export default function ChartsPage() {
               </button>
             </div>
             <div className="grid gap-2 p-4">
-            {INDICATORS.map((indicator) => (
+              {INDICATORS.map((indicator) => (
                 <label
                   key={indicator}
                   className="flex cursor-pointer items-center justify-between rounded-md border border-gray-800 bg-gray-900/70 px-3 py-2 text-sm text-gray-300"
@@ -465,41 +457,12 @@ export default function ChartsPage() {
                     type="checkbox"
                     checked={activeIndicators.includes(indicator)}
                     onChange={() => toggleIndicator(indicator)}
-                    className="h-4 w-4 accent-[var(--accent)]"
+                    className="h-4 w-4 accent-emerald-500"
                   />
                 </label>
               ))}
             </div>
           </div>
-        </div>
-      )}
-
-      {/* Stats Row */}
-      {chartData.length > 0 && (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {[
-            { label: "Open", value: chartData[0]?.open.toFixed(5) },
-            {
-              label: "Current",
-              value: chartData[chartData.length - 1]?.close.toFixed(5),
-            },
-            {
-              label: "High",
-              value: Math.max(...chartData.map((d) => d.high)).toFixed(5),
-            },
-            {
-              label: "Low",
-              value: Math.min(...chartData.map((d) => d.low)).toFixed(5),
-            },
-          ].map((stat) => (
-            <div
-              key={stat.label}
-              className="rounded-lg border border-gray-800 bg-gray-900 p-4"
-            >
-              <p className="text-gray-500 text-xs mb-1">{stat.label}</p>
-              <p className="text-white font-bold font-mono">{stat.value}</p>
-            </div>
-          ))}
         </div>
       )}
     </div>

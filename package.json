@@ -3,7 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "concurrently -n next,socket -c cyan,green \"npm run dev:frontend\" \"npm run dev:socket\"",
+    "dev:frontend": "next dev",
+    "dev:socket": "node socket-server.js",
     "dev:clean": "rm -rf .next && next dev",
     "build": "next build",
     "start": "next start",
@@ -12,6 +14,7 @@
   "dependencies": {
     "axios": "^1.15.1",
     "bcryptjs": "^3.0.3",
+    "cors": "^2.8.5",
     "lightweight-charts": "^5.2.0",
     "lucide-react": "^1.16.0",
     "mongoose": "^9.4.1",
@@ -21,6 +24,7 @@
     "react-calendar": "^6.0.1",
     "react-dom": "19.2.4",
     "recharts": "^3.8.1",
+    "socket.io": "^4.8.3",
     "socket.io-client": "^4.8.3"
   },
   "devDependencies": {
@@ -30,8 +34,11 @@
     "@types/react": "^19",
     "@types/react-calendar": "^3.9.0",
     "@types/react-dom": "^19",
+    "concurrently": "9.2.1",
+    "cors": "2.8.6",
     "eslint": "^9",
     "eslint-config-next": "16.2.4",
+    "socket.io": "4.8.3",
     "tailwindcss": "^4",
     "typescript": "^5"
   }
