@@ -9,7 +9,7 @@ export default function TradeExecutionPanel() {
   const [takeProfit, setTakeProfit] = useState("");
 
   return (
-    <div className="rounded-lg border border-gray-800 bg-gray-950/60 p-4">
+    <div className="rounded-lg border border-gray-800 bg-gray-950/80 p-4 shadow-[0_12px_35px_rgba(0,0,0,0.18)]">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-500">
           Trade Execution
@@ -43,7 +43,7 @@ export default function TradeExecutionPanel() {
             step="0.01"
             value={lotSize}
             onChange={(e) => setLotSize(e.target.value)}
-            className="mt-2 w-full rounded border border-gray-800 bg-gray-900/50 px-3 py-1.5 text-sm font-mono text-white outline-none focus:border-emerald-500/50"
+            className="mt-2 w-full rounded-md border border-gray-800 bg-gray-900/50 px-3 py-2 text-sm font-mono text-white outline-none transition focus:border-emerald-500/50"
           />
         </div>
 
@@ -58,7 +58,7 @@ export default function TradeExecutionPanel() {
               placeholder="Price or Pips"
               value={stopLoss}
               onChange={(e) => setStopLoss(e.target.value)}
-              className="w-full rounded border border-gray-800 bg-gray-900/50 px-3 py-1.5 text-sm font-mono text-white outline-none focus:border-red-500/50"
+              className="w-full rounded-md border border-gray-800 bg-gray-900/50 px-3 py-2 text-sm font-mono text-white outline-none transition focus:border-red-500/50"
             />
           </div>
           <div>
@@ -70,13 +70,13 @@ export default function TradeExecutionPanel() {
               placeholder="Price or Pips"
               value={takeProfit}
               onChange={(e) => setTakeProfit(e.target.value)}
-              className="w-full rounded border border-gray-800 bg-gray-900/50 px-3 py-1.5 text-sm font-mono text-white outline-none focus:border-emerald-500/50"
+              className="w-full rounded-md border border-gray-800 bg-gray-900/50 px-3 py-2 text-sm font-mono text-white outline-none transition focus:border-emerald-500/50"
             />
           </div>
         </div>
 
         {/* Risk Calculator Info */}
-        <div className="rounded-md bg-gray-900/30 p-2.5 text-xs">
+        <div className="rounded-md border border-gray-800/80 bg-gray-900/30 p-3 text-xs">
           <div className="flex items-center gap-1.5 mb-2 text-gray-400">
             <Calculator className="h-3 w-3" />
             <span className="font-medium">Risk/Reward Profile</span>
@@ -91,10 +91,10 @@ export default function TradeExecutionPanel() {
 
         {/* Action Buttons */}
         <div className="grid grid-cols-2 gap-3 pt-2">
-          <button className="rounded bg-red-500/10 border border-red-500/20 py-2.5 text-sm font-bold text-red-400 transition hover:bg-red-500/20 hover:text-red-300 shadow-[0_0_15px_rgba(239,68,68,0.1)]">
+          <button type="button" className="rounded-md bg-red-500/10 border border-red-500/20 py-2.5 text-sm font-bold text-red-400 transition hover:bg-red-500/20 hover:text-red-300 shadow-[0_0_15px_rgba(239,68,68,0.1)]">
             SELL
           </button>
-          <button className="rounded bg-emerald-500/10 border border-emerald-500/20 py-2.5 text-sm font-bold text-emerald-400 transition hover:bg-emerald-500/20 hover:text-emerald-300 shadow-[0_0_15px_rgba(16,185,129,0.1)]">
+          <button type="button" className="rounded-md bg-emerald-500/10 border border-emerald-500/20 py-2.5 text-sm font-bold text-emerald-400 transition hover:bg-emerald-500/20 hover:text-emerald-300 shadow-[0_0_15px_rgba(16,185,129,0.1)]">
             BUY
           </button>
         </div>

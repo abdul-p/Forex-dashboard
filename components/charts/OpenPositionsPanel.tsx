@@ -27,22 +27,22 @@ export default function OpenPositionsPanel() {
   ];
 
   return (
-    <div className="flex h-full flex-col rounded-lg border border-gray-800 bg-gray-950/60 overflow-hidden">
-      <div className="flex items-center gap-4 border-b border-gray-800 bg-gray-900/30 px-4 py-2 text-xs font-medium text-gray-400">
-        <button className="text-white border-b-2 border-emerald-500 pb-1 -mb-[9px]">
+    <div className="flex h-full flex-col overflow-hidden rounded-lg border border-gray-800 bg-gray-950/80 shadow-[0_12px_35px_rgba(0,0,0,0.18)]">
+      <div className="flex items-center gap-4 border-b border-gray-800 bg-gray-900/40 px-4 py-2 text-xs font-medium text-gray-400">
+        <button type="button" className="text-white border-b-2 border-emerald-500 pb-1 -mb-[9px]">
           Open Positions (2)
         </button>
-        <button className="hover:text-gray-300 pb-1 -mb-[9px]">
+        <button type="button" className="hover:text-gray-300 pb-1 -mb-[9px]">
           Pending Orders (0)
         </button>
-        <button className="hover:text-gray-300 pb-1 -mb-[9px]">
+        <button type="button" className="hover:text-gray-300 pb-1 -mb-[9px]">
           Trade History
         </button>
       </div>
 
       <div className="flex-1 overflow-auto">
         <table className="w-full text-left text-[11px]">
-          <thead className="sticky top-0 bg-gray-950/90 text-gray-500 backdrop-blur-sm z-10 shadow-sm">
+          <thead className="sticky top-0 bg-gray-950/95 text-gray-500 backdrop-blur-sm z-10 shadow-sm">
             <tr>
               <th className="px-4 py-2 font-medium">Pair</th>
               <th className="px-4 py-2 font-medium">Type</th>
@@ -78,10 +78,10 @@ export default function OpenPositionsPanel() {
                 </td>
                 <td className="px-4 py-2">
                   <div className="flex items-center justify-center gap-2 opacity-40 group-hover:opacity-100 transition-opacity">
-                    <button title="Modify Position" className="text-gray-400 hover:text-emerald-400">
+                    <button type="button" title="Modify Position" className="text-gray-400 hover:text-emerald-400">
                       <Edit2 className="h-3.5 w-3.5" />
                     </button>
-                    <button title="Close Position" className="text-gray-400 hover:text-red-400">
+                    <button type="button" title="Close Position" className="text-gray-400 hover:text-red-400">
                       <XCircle className="h-3.5 w-3.5" />
                     </button>
                   </div>

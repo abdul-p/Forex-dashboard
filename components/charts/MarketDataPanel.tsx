@@ -16,10 +16,17 @@ export default function MarketDataPanel({
   low,
 }: MarketDataPanelProps) {
   return (
-    <div className="rounded-lg border border-gray-800 bg-gray-950/60 p-4">
-      <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-500">
-        Market Data
-      </h3>
+    <div className="rounded-lg border border-gray-800 bg-gray-950/80 p-4 shadow-[0_12px_35px_rgba(0,0,0,0.18)]">
+      <div className="mb-4 flex items-center justify-between">
+        <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-500">
+          Market Data
+        </h3>
+        <span
+          className={`h-2 w-2 rounded-full ${
+            isPositive ? "bg-emerald-400" : "bg-red-400"
+          }`}
+        />
+      </div>
       
       <div className="mb-4">
         <div className="text-sm font-medium text-gray-400">{pair}</div>
@@ -39,23 +46,23 @@ export default function MarketDataPanel({
       </div>
 
       <div className="grid grid-cols-2 gap-3 text-xs">
-        <div>
+        <div className="rounded-md border border-gray-800/80 bg-gray-900/40 p-3">
           <div className="text-gray-500 mb-1">Daily High</div>
           <div className="font-mono text-gray-200">{high || "---"}</div>
         </div>
-        <div>
+        <div className="rounded-md border border-gray-800/80 bg-gray-900/40 p-3">
           <div className="text-gray-500 mb-1">Daily Low</div>
           <div className="font-mono text-gray-200">{low || "---"}</div>
         </div>
-        <div>
+        <div className="rounded-md border border-gray-800/80 bg-gray-900/40 p-3">
           <div className="text-gray-500 mb-1">Spread</div>
           <div className="font-mono text-gray-200">1.2 pips</div>
         </div>
-        <div>
+        <div className="rounded-md border border-gray-800/80 bg-gray-900/40 p-3">
           <div className="text-gray-500 mb-1">Volume</div>
           <div className="font-mono text-gray-200">24.5K</div>
         </div>
-        <div className="col-span-2 mt-1 pt-3 border-t border-gray-800/50">
+        <div className="col-span-2 mt-1 rounded-md border border-gray-800/80 bg-gray-900/40 p-3">
           <div className="flex justify-between items-center">
             <span className="text-gray-500">Volatility (ATR)</span>
             <span className="font-mono text-gray-200">0.0018</span>

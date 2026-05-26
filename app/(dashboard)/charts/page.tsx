@@ -199,16 +199,49 @@ export default function ChartsPage() {
   const currentPrice = chartData[chartData.length - 1]?.close.toFixed(5) || null;
 
   return (
-    <div className="flex flex-col h-[calc(100vh-theme(spacing.16))] space-y-4 pt-2 pb-4">
-      {/* Top Toolbar */}
-      <div className="shrink-0 rounded-lg border border-gray-800 bg-gray-950/40">
-        <div className="grid gap-3 p-3 xl:grid-cols-[minmax(13rem,1.2fr)_auto_auto_auto_auto]">
-          {/* Pair Selector */}
+    <div className="flex min-h-[calc(100vh-9rem)] flex-col gap-4">
+      <div className="flex flex-wrap items-end justify-between gap-4 border-b border-gray-800/80 pb-4">
+        <div>
+          <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-gray-500">
+            <Activity className="h-3.5 w-3.5 text-emerald-400" />
+            Live charting workspace
+          </div>
+          <h1 className="mt-1 text-2xl font-bold text-white">{selectedPair}</h1>
+        </div>
+        <div className="flex items-end gap-4 text-right">
+          <div>
+            <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-500">
+              Last Price
+            </p>
+            <p className="font-mono text-xl font-semibold text-white">
+              {currentPrice || "---.-----"}
+            </p>
+          </div>
+          <div
+            className={`rounded-md border px-3 py-2 ${
+              isPositive
+                ? "border-emerald-500/25 bg-emerald-500/10 text-emerald-300"
+                : "border-red-500/25 bg-red-500/10 text-red-300"
+            }`}
+          >
+            <p className="text-[10px] font-semibold uppercase tracking-wide opacity-70">
+              Session
+            </p>
+            <p className="font-mono text-sm font-semibold">
+              {isPositive ? "+" : ""}
+              {priceChangePercent}%
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div className="shrink-0 overflow-visible rounded-lg border border-gray-800 bg-gray-950/70 shadow-[0_18px_55px_rgba(0,0,0,0.24)]">
+        <div className="grid gap-3 p-3 lg:grid-cols-[minmax(13rem,1.2fr)_auto_auto_auto_auto]">
           <div className="relative min-w-0">
             <label className="mb-1 block text-[10px] font-semibold uppercase tracking-wide text-gray-500">
               Pair
             </label>
-            <div className="flex h-10 items-center gap-2 rounded-md border border-gray-800 bg-gray-900/80 px-3">
+            <div className="flex h-10 items-center gap-2 rounded-md border border-gray-800 bg-gray-900/80 px-3 ring-1 ring-white/[0.03] transition focus-within:border-emerald-500/50">
               <Search className="h-4 w-4 shrink-0 text-gray-500" />
               <input
                 value={pairSearch}
@@ -231,7 +264,7 @@ export default function ChartsPage() {
             </div>
 
             {pairDropdownOpen && (
-              <div className="absolute left-0 right-0 top-[4.2rem] z-20 overflow-hidden rounded-md border border-gray-800 bg-gray-950 shadow-xl">
+              <div className="absolute left-0 right-0 top-[4.2rem] z-30 overflow-hidden rounded-md border border-gray-800 bg-gray-950 shadow-2xl">
                 {filteredPairs.length > 0 ? (
                   filteredPairs.map((pair) => (
                     <button
@@ -257,15 +290,15 @@ export default function ChartsPage() {
             )}
           </div>
 
-          {/* Timeframe Selector */}
           <div>
             <p className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-gray-500">
               Timeframe
             </p>
-            <div className="flex h-10 overflow-hidden rounded-md border border-gray-800 bg-gray-900/80">
+            <div className="flex h-10 overflow-hidden rounded-md border border-gray-800 bg-gray-900/80 ring-1 ring-white/[0.03]">
               {INTERVALS.map((interval) => (
                 <button
                   key={interval.value}
+                  type="button"
                   onClick={() => setSelectedInterval(interval.value)}
                   className={`min-w-9 px-2 text-xs font-semibold transition ${
                     selectedInterval === interval.value
@@ -279,12 +312,11 @@ export default function ChartsPage() {
             </div>
           </div>
 
-          {/* Chart Type Selector */}
           <div>
             <p className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-gray-500">
               Chart Type
             </p>
-            <div className="flex h-10 overflow-hidden rounded-md border border-gray-800 bg-gray-900/80">
+            <div className="flex h-10 overflow-hidden rounded-md border border-gray-800 bg-gray-900/80 ring-1 ring-white/[0.03]">
               {CHART_TYPES.map((type) => {
                 const TypeIcon = type.icon;
                 return (
@@ -306,7 +338,6 @@ export default function ChartsPage() {
             </div>
           </div>
 
-          {/* Indicators Button */}
           <div>
             <p className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-gray-500">
               Indicators
@@ -314,19 +345,18 @@ export default function ChartsPage() {
             <button
               type="button"
               onClick={() => setIndicatorModalOpen(true)}
-              className="flex h-10 items-center gap-2 rounded-md border border-gray-800 bg-gray-900/80 px-3 text-sm font-medium text-gray-300 transition hover:border-gray-700 hover:text-white"
+              className="flex h-10 items-center gap-2 rounded-md border border-gray-800 bg-gray-900/80 px-3 text-sm font-medium text-gray-300 ring-1 ring-white/[0.03] transition hover:border-gray-700 hover:text-white"
             >
               <SlidersHorizontal className="h-4 w-4" />
               {activeIndicators.length} active
             </button>
           </div>
 
-          {/* Layout Controls */}
           <div>
             <p className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-gray-500">
               Layout
             </p>
-            <div className="flex h-10 overflow-hidden rounded-md border border-gray-800 bg-gray-900/80">
+            <div className="flex h-10 overflow-hidden rounded-md border border-gray-800 bg-gray-900/80 ring-1 ring-white/[0.03]">
               <button
                 type="button"
                 title="Fullscreen"
@@ -367,8 +397,7 @@ export default function ChartsPage() {
           </div>
         </div>
 
-        {/* Drawing Tools */}
-        <div className="flex flex-wrap items-center gap-2 border-t border-gray-800 px-3 py-2">
+        <div className="flex flex-wrap items-center gap-2 border-t border-gray-800/80 px-3 py-2.5">
           <span className="text-[10px] font-semibold uppercase tracking-wide text-gray-500">
             Drawing Tools
           </span>
@@ -393,10 +422,8 @@ export default function ChartsPage() {
         </div>
       </div>
 
-      {/* Main Content Layout */}
-      <div className="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-4">
-        {/* Left: Chart Engine */}
-        <div className="flex flex-col min-h-0 rounded-lg border border-gray-800 bg-gray-950/40 p-1">
+      <div className="grid min-h-[660px] flex-1 grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_320px]">
+        <div className="min-h-[520px] min-w-0">
           <MainChartEngine
             candles={chartData}
             selectedPair={selectedPair}
@@ -408,8 +435,7 @@ export default function ChartsPage() {
           />
         </div>
 
-        {/* Right: Side Panels */}
-        <div className="flex flex-col gap-4 overflow-y-auto pr-1">
+        <aside className="grid min-h-0 gap-4 xl:max-h-[calc(100vh-18.5rem)] xl:overflow-y-auto xl:pr-1">
           <MarketDataPanel
             pair={selectedPair}
             price={currentPrice}
@@ -420,11 +446,10 @@ export default function ChartsPage() {
           />
           <TechnicalAnalysisPanel />
           <TradeExecutionPanel />
-        </div>
+        </aside>
       </div>
 
-      {/* Bottom: Open Positions */}
-      <div className="shrink-0 h-52">
+      <div className="h-56 shrink-0">
         <OpenPositionsPanel />
       </div>
 

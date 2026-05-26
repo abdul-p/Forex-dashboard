@@ -556,8 +556,8 @@ export default function MainChartEngine({
       : null);
 
   return (
-    <div className="rounded-lg border border-gray-800 bg-gray-950/60">
-      <div className="flex flex-wrap items-start justify-between gap-4 border-b border-gray-800 px-4 py-3">
+    <div className="flex h-full min-h-[520px] flex-col overflow-hidden rounded-lg border border-gray-800 bg-gray-950/80 shadow-[0_18px_55px_rgba(0,0,0,0.22)]">
+      <div className="flex flex-wrap items-start justify-between gap-4 border-b border-gray-800/80 bg-gray-900/30 px-4 py-3">
         <div>
           <div className="flex items-center gap-2">
             <h2 className="text-lg font-bold text-white">{selectedPair}</h2>
@@ -572,7 +572,7 @@ export default function MainChartEngine({
             </span>
           </div>
           <p className="mt-1 text-xs text-gray-500">
-            {chartType} chart · zoom, pan, crosshair, overlays, and indicator panes
+            {chartType} chart / {selectedInterval} / {activeIndicators.length} indicators
           </p>
         </div>
 
@@ -602,8 +602,8 @@ export default function MainChartEngine({
         )}
       </div>
 
-      <div className="relative min-h-[560px]">
-        <div ref={containerRef} className="h-[560px] w-full" />
+      <div className="relative min-h-[420px] flex-1">
+        <div ref={containerRef} className="absolute inset-0" />
         {loading && (
           <div className="absolute inset-0 flex items-center justify-center bg-gray-950/80 text-sm text-gray-500">
             Loading chart data...

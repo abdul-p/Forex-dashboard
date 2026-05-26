@@ -4,7 +4,7 @@ export default function TechnicalAnalysisPanel() {
   const trend = "Bullish";
 
   return (
-    <div className="rounded-lg border border-gray-800 bg-gray-950/60 p-4">
+    <div className="rounded-lg border border-gray-800 bg-gray-950/80 p-4 shadow-[0_12px_35px_rgba(0,0,0,0.18)]">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-500">
           Technical Analysis
@@ -12,7 +12,7 @@ export default function TechnicalAnalysisPanel() {
         <Activity className="h-4 w-4 text-gray-500" />
       </div>
 
-      <div className="mb-5 flex items-center justify-between rounded-md bg-gray-900/50 p-2">
+      <div className="mb-5 flex items-center justify-between rounded-md border border-gray-800/80 bg-gray-900/50 p-3">
         <span className="text-xs text-gray-400">Overall Trend</span>
         <div className="flex items-center gap-1.5">
           {trend === "Bullish" ? (
@@ -32,7 +32,7 @@ export default function TechnicalAnalysisPanel() {
         <h4 className="text-[10px] font-semibold uppercase text-gray-500">
           Indicator Readings
         </h4>
-        <div className="grid grid-cols-[1fr_auto] gap-y-2 text-xs">
+        <div className="grid grid-cols-[1fr_auto] gap-y-2.5 text-xs">
           <span className="text-gray-400">RSI (14)</span>
           <span className="text-right font-medium text-emerald-400">68</span>
 
@@ -48,7 +48,7 @@ export default function TechnicalAnalysisPanel() {
         <h4 className="text-[10px] font-semibold uppercase text-gray-500">
           Key Levels
         </h4>
-        <div className="space-y-1.5">
+        <div className="space-y-1.5 rounded-md border border-gray-800/80 bg-gray-900/30 p-3">
           <div className="flex justify-between items-center text-xs">
             <span className="text-gray-400">Resistance 2</span>
             <span className="font-mono text-gray-200">1.0945</span>
