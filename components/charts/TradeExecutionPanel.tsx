@@ -1,104 +1,101 @@
 "use client";
 
 import { useState } from "react";
-import { Calculator } from "lucide-react";
+import { Minus, Plus } from "lucide-react";
 
-export default function TradeExecutionPanel() {
+interface TradeExecutionPanelProps {
+  buyPrice: string;
+  sellPrice: string;
+}
+
+export default function TradeExecutionPanel({ buyPrice, sellPrice }: TradeExecutionPanelProps) {
   const [lotSize, setLotSize] = useState("0.10");
-  const [stopLoss, setStopLoss] = useState("");
-  const [takeProfit, setTakeProfit] = useState("");
+  const [risk, setRisk] = useState("2.00");
+  const [stopLoss, setStopLoss] = useState("1.08200");
+  const [takeProfit, setTakeProfit] = useState("1.09500");
+  const [orderType, setOrderType] = useState("Market");
 
   return (
-    <div className="rounded-lg border border-gray-800 bg-gray-950/80 p-4 shadow-[0_12px_35px_rgba(0,0,0,0.18)]">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-500">
-          Trade Execution
-        </h3>
+    <section className="rounded-md border border-slate-800 bg-[#0a1421] p-3 shadow-[0_12px_35px_rgba(0,0,0,0.22)]">
+      <h3 className="mb-3 text-sm font-semibold text-white">Trade Execution</h3>
+
+      <div className="mb-2 grid grid-cols-3 gap-2 rounded-md bg-[#07101b] p-1">
+        {["Market", "Limit", "Stop"].map((type) => (
+          <button
+            key={type}
+            type="button"
+            onClick={() => setOrderType(type)}
+            className={`h-7 rounded text-xs ${orderType === type ? "bg-blue-600/70 text-white" : "text-slate-400"}`}
+          >
+            {type}
+          </button>
+        ))}
       </div>
 
-      <div className="space-y-4">
-        {/* Lot Size */}
+      <div className="mb-3 grid grid-cols-2 gap-3">
+        <button type="button" className="rounded bg-emerald-500 px-3 py-3 text-sm font-bold text-white shadow-[0_10px_25px_rgba(16,185,129,0.22)]">
+          Buy
+          <span className="block font-mono">{buyPrice}</span>
+        </button>
+        <button type="button" className="rounded bg-red-500 px-3 py-3 text-sm font-bold text-white shadow-[0_10px_25px_rgba(239,68,68,0.2)]">
+          Sell
+          <span className="block font-mono">{sellPrice}</span>
+        </button>
+      </div>
+
+      <div className="grid grid-cols-2 gap-3">
+        <Field label="Lot Size" value={lotSize} onChange={setLotSize} />
+        <Field label="Risk" value={risk} onChange={setRisk} suffix="%" />
+        <Field label="Stop Loss" value={stopLoss} onChange={setStopLoss} />
+        <Field label="Take Profit" value={takeProfit} onChange={setTakeProfit} />
+      </div>
+
+      <div className="mt-4 grid grid-cols-2 gap-4 text-xs">
         <div>
-          <label className="mb-1.5 block text-[10px] font-semibold uppercase text-gray-500">
-            Lot Size
-          </label>
-          <div className="flex gap-2">
-            {["0.01", "0.10", "1.00"].map((size) => (
-              <button
-                key={size}
-                type="button"
-                onClick={() => setLotSize(size)}
-                className={`flex-1 rounded border py-1.5 text-xs font-medium transition ${
-                  lotSize === size
-                    ? "border-emerald-500/50 bg-emerald-500/10 text-emerald-400"
-                    : "border-gray-800 bg-gray-900/50 text-gray-400 hover:border-gray-700 hover:text-gray-300"
-                }`}
-              >
-                {size}
-              </button>
-            ))}
-          </div>
-          <input
-            type="number"
-            step="0.01"
-            value={lotSize}
-            onChange={(e) => setLotSize(e.target.value)}
-            className="mt-2 w-full rounded-md border border-gray-800 bg-gray-900/50 px-3 py-2 text-sm font-mono text-white outline-none transition focus:border-emerald-500/50"
-          />
+          <p className="text-slate-400">Margin Required</p>
+          <p className="mt-1 font-mono text-white">$214.35</p>
         </div>
-
-        {/* SL & TP */}
-        <div className="grid grid-cols-2 gap-3">
-          <div>
-            <label className="mb-1.5 block text-[10px] font-semibold uppercase text-gray-500">
-              Stop Loss
-            </label>
-            <input
-              type="text"
-              placeholder="Price or Pips"
-              value={stopLoss}
-              onChange={(e) => setStopLoss(e.target.value)}
-              className="w-full rounded-md border border-gray-800 bg-gray-900/50 px-3 py-2 text-sm font-mono text-white outline-none transition focus:border-red-500/50"
-            />
-          </div>
-          <div>
-            <label className="mb-1.5 block text-[10px] font-semibold uppercase text-gray-500">
-              Take Profit
-            </label>
-            <input
-              type="text"
-              placeholder="Price or Pips"
-              value={takeProfit}
-              onChange={(e) => setTakeProfit(e.target.value)}
-              className="w-full rounded-md border border-gray-800 bg-gray-900/50 px-3 py-2 text-sm font-mono text-white outline-none transition focus:border-emerald-500/50"
-            />
-          </div>
-        </div>
-
-        {/* Risk Calculator Info */}
-        <div className="rounded-md border border-gray-800/80 bg-gray-900/30 p-3 text-xs">
-          <div className="flex items-center gap-1.5 mb-2 text-gray-400">
-            <Calculator className="h-3 w-3" />
-            <span className="font-medium">Risk/Reward Profile</span>
-          </div>
-          <div className="grid grid-cols-2 gap-1 font-mono">
-            <div className="text-gray-500">Risk: <span className="text-red-400">2%</span></div>
-            <div className="text-gray-500 text-right">Margin: <span className="text-gray-200">$214.00</span></div>
-            <div className="text-gray-500">Reward: <span className="text-emerald-400">6%</span></div>
-            <div className="text-gray-500 text-right">Ratio: <span className="text-gray-200">1:3</span></div>
-          </div>
-        </div>
-
-        {/* Action Buttons */}
-        <div className="grid grid-cols-2 gap-3 pt-2">
-          <button type="button" className="rounded-md bg-red-500/10 border border-red-500/20 py-2.5 text-sm font-bold text-red-400 transition hover:bg-red-500/20 hover:text-red-300 shadow-[0_0_15px_rgba(239,68,68,0.1)]">
-            SELL
-          </button>
-          <button type="button" className="rounded-md bg-emerald-500/10 border border-emerald-500/20 py-2.5 text-sm font-bold text-emerald-400 transition hover:bg-emerald-500/20 hover:text-emerald-300 shadow-[0_0_15px_rgba(16,185,129,0.1)]">
-            BUY
-          </button>
+        <div className="text-right">
+          <p className="text-slate-400">Potential Profit</p>
+          <p className="mt-1 font-mono font-semibold text-emerald-400">+$78.60</p>
         </div>
       </div>
-    </div>
+
+      <button type="button" className="mt-4 h-10 w-full rounded bg-blue-600 text-sm font-semibold text-white hover:bg-blue-500">
+        Place Buy Order
+      </button>
+    </section>
+  );
+}
+
+function Field({
+  label,
+  value,
+  suffix,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  suffix?: string;
+  onChange: (value: string) => void;
+}) {
+  return (
+    <label className="block">
+      <span className="mb-1 block text-xs text-slate-400">{label}</span>
+      <span className="flex h-8 overflow-hidden rounded border border-slate-700 bg-[#07101b]">
+        <input
+          value={value}
+          onChange={(event) => onChange(event.target.value)}
+          className="min-w-0 flex-1 bg-transparent px-2 font-mono text-xs text-white outline-none"
+        />
+        {suffix && <span className="flex items-center border-l border-slate-700 px-2 text-xs text-slate-300">{suffix}</span>}
+        <button type="button" className="flex w-8 items-center justify-center border-l border-slate-700 text-slate-400" aria-label={`Decrease ${label}`}>
+          <Minus className="h-3 w-3" />
+        </button>
+        <button type="button" className="flex w-8 items-center justify-center border-l border-slate-700 text-slate-400" aria-label={`Increase ${label}`}>
+          <Plus className="h-3 w-3" />
+        </button>
+      </span>
+    </label>
   );
 }

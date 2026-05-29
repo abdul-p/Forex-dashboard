@@ -1,7 +1,7 @@
 "use client";
 
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { PanelLeftOpen } from "lucide-react";
 import Sidebar from "@/components/Sidebar";
@@ -14,7 +14,9 @@ export default function DashboardLayout({
 }) {
   const { status } = useSession();
   const router = useRouter();
+  const pathname = usePathname();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const isChartWorkspace = pathname === "/charts";
 
   useEffect(() => {
     if (status === "unauthenticated") router.push("/login");
@@ -43,8 +45,10 @@ export default function DashboardLayout({
         </button>
       )}
       <main
-        className={`flex-1 overflow-y-auto p-8 pb-20 transition-[margin,padding] ${
-          isSidebarOpen ? "ml-72" : "ml-0 pl-24"
+        className={`flex-1 overflow-y-auto transition-[margin,padding] ${
+          isChartWorkspace ? "p-0 pb-0" : "p-8 pb-20"
+        } ${isSidebarOpen ? "ml-72" : isChartWorkspace ? "ml-0" : "ml-0 pl-24"} ${
+          isChartWorkspace ? "h-screen" : ""
         }`}
       >
         {children}

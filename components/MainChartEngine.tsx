@@ -123,6 +123,34 @@ const calculateVwap = (candles: ChartCandle[]): LineData<Time>[] => {
   });
 };
 
+const toVolumeData = (candles: ChartCandle[]): HistogramData<Time>[] =>
+  candles.map((candle, index) => {
+    const previous = candles[index - 1]?.close ?? candle.open;
+    const range = Math.max(candle.high - candle.low, 0.00001);
+    const value = Math.round(range * 24_000_000);
+
+    return {
+      time: candle.time,
+      value,
+      color:
+        candle.close >= previous
+          ? "rgba(16, 185, 129, 0.38)"
+          : "rgba(239, 68, 68, 0.42)",
+    };
+  });
+
+const supportResistance = (candles: ChartCandle[]) => {
+  const recent = candles.slice(-80);
+  if (recent.length === 0) {
+    return null;
+  }
+
+  const resistance = Math.max(...recent.map((candle) => candle.high));
+  const support = Math.min(...recent.map((candle) => candle.low));
+
+  return { resistance, support };
+};
+
 const calculateRsi = (candles: ChartCandle[], period = 14): LineData<Time>[] => {
   if (candles.length <= period) {
     return [];
@@ -297,25 +325,25 @@ export default function MainChartEngine({
 
     const chart = createChart(containerRef.current, {
       autoSize: true,
-      height: 560,
+      height: 620,
       layout: {
-        background: { type: ColorType.Solid, color: "#050505" },
-        textColor: "#9ca3af",
+        background: { type: ColorType.Solid, color: "#08111d" },
+        textColor: "#94a3b8",
       },
       grid: {
-        vertLines: { color: "rgba(31, 41, 55, 0.55)" },
-        horzLines: { color: "rgba(31, 41, 55, 0.55)" },
+        vertLines: { color: "rgba(30, 41, 59, 0.62)" },
+        horzLines: { color: "rgba(30, 41, 59, 0.62)" },
       },
       crosshair: {
         mode: CrosshairMode.Normal,
-        vertLine: { color: "rgba(207, 204, 209, 0.65)", labelBackgroundColor: "#111827" },
-        horzLine: { color: "rgba(207, 204, 209, 0.65)", labelBackgroundColor: "#111827" },
+        vertLine: { color: "rgba(148, 163, 184, 0.7)", labelBackgroundColor: "#0f172a" },
+        horzLine: { color: "rgba(148, 163, 184, 0.7)", labelBackgroundColor: "#0f172a" },
       },
       rightPriceScale: {
-        borderColor: "#1f2937",
+        borderColor: "#1e293b",
       },
       timeScale: {
-        borderColor: "#1f2937",
+        borderColor: "#1e293b",
         timeVisible: true,
         secondsVisible: false,
       },
@@ -385,30 +413,31 @@ export default function MainChartEngine({
 
     if (chartType === "Line") {
       const lineSeries = chart.addSeries(LineSeries, {
-        color: "#cfccd1",
+        color: "#2563eb",
         lineWidth: 2,
-        priceLineColor: "#cfccd1",
+        priceLineColor: "#14b8a6",
       });
       lineSeries.setData(toLineData(candles));
       mainSeriesRef.current = lineSeries;
     } else if (chartType === "Area") {
       const areaSeries = chart.addSeries(AreaSeries, {
-        lineColor: "#cfccd1",
-        topColor: "rgba(207, 204, 209, 0.24)",
-        bottomColor: "rgba(207, 204, 209, 0.02)",
+        lineColor: "#2563eb",
+        topColor: "rgba(37, 99, 235, 0.24)",
+        bottomColor: "rgba(20, 184, 166, 0.03)",
         lineWidth: 2,
-        priceLineColor: "#cfccd1",
+        priceLineColor: "#14b8a6",
       });
       areaSeries.setData(toLineData(candles));
       mainSeriesRef.current = areaSeries;
     } else {
       const candleSeries = chart.addSeries(CandlestickSeries, {
-        upColor: "#cfccd1",
-        downColor: "#f87171",
-        borderUpColor: "#cfccd1",
-        borderDownColor: "#f87171",
-        wickUpColor: "#cfccd1",
+        upColor: "#10b981",
+        downColor: "#ef4444",
+        borderUpColor: "#10b981",
+        borderDownColor: "#ef4444",
+        wickUpColor: "#34d399",
         wickDownColor: "#f87171",
+        priceLineColor: "#14b8a6",
       });
       candleSeries.setData(mainCandles);
       mainSeriesRef.current = candleSeries;
@@ -419,18 +448,43 @@ export default function MainChartEngine({
     }
 
     if (activeIndicators.includes("EMA 50")) {
-      addOverlay(calculateEma(candles, 50), "#fbbf24", "EMA 50");
+      addOverlay(calculateEma(candles, 50), "#f59e0b", "EMA 50");
+    }
+
+    if (activeIndicators.includes("EMA 200")) {
+      addOverlay(calculateEma(candles, 200), "#8b5cf6", "EMA 200");
     }
 
     if (activeIndicators.includes("VWAP")) {
       addOverlay(calculateVwap(candles), "#a78bfa", "VWAP");
     }
 
+    if (activeIndicators.includes("Volume")) {
+      const volumeSeries = chart.addSeries(
+        HistogramSeries,
+        {
+          priceFormat: { type: "volume" },
+          priceScaleId: "volume",
+          priceLineVisible: false,
+          lastValueVisible: false,
+        },
+        0,
+      );
+      chart.priceScale("volume").applyOptions({
+        scaleMargins: {
+          top: 0.78,
+          bottom: 0,
+        },
+      });
+      volumeSeries.setData(toVolumeData(candles));
+      seriesToRemove.push(volumeSeries);
+    }
+
     if (activeIndicators.includes("RSI")) {
       const rsiSeries = chart.addSeries(
         LineSeries,
         {
-          color: "#34d399",
+          color: "#a855f7",
           lineWidth: 2,
           priceFormat: { type: "price", precision: 2, minMove: 0.01 },
           title: "RSI 14",
@@ -456,7 +510,7 @@ export default function MainChartEngine({
 
       const macdSeries = chart.addSeries(
         LineSeries,
-        { color: "#cfccd1", lineWidth: 2, title: "MACD" },
+        { color: "#2563eb", lineWidth: 2, title: "MACD" },
         activeIndicators.includes("RSI") ? 2 : 1,
       );
       macdSeries.setData(macdLine);
@@ -464,7 +518,7 @@ export default function MainChartEngine({
 
       const signalSeries = chart.addSeries(
         LineSeries,
-        { color: "#f87171", lineWidth: 1, title: "Signal" },
+        { color: "#f97316", lineWidth: 1, title: "Signal" },
         activeIndicators.includes("RSI") ? 2 : 1,
       );
       signalSeries.setData(signalLine);
@@ -543,6 +597,7 @@ export default function MainChartEngine({
   }, [onLiveCandle, selectedInterval, selectedPair]);
 
   const latest = candles[candles.length - 1];
+  const levels = supportResistance(candles);
   const snapshot =
     crosshair ??
     (latest
@@ -556,64 +611,76 @@ export default function MainChartEngine({
       : null);
 
   return (
-    <div className="flex h-full min-h-[520px] flex-col overflow-hidden rounded-lg border border-gray-800 bg-gray-950/80 shadow-[0_18px_55px_rgba(0,0,0,0.22)]">
-      <div className="flex flex-wrap items-start justify-between gap-4 border-b border-gray-800/80 bg-gray-900/30 px-4 py-3">
-        <div>
-          <div className="flex items-center gap-2">
-            <h2 className="text-lg font-bold text-white">{selectedPair}</h2>
-            <span
-              className={`rounded-sm border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${
-                streamStatus === "Socket live"
-                  ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-300"
-                  : "border-gray-800 bg-gray-900 text-gray-500"
-              }`}
-            >
-              {streamStatus}
-            </span>
-          </div>
-          <p className="mt-1 text-xs text-gray-500">
-            {chartType} chart / {selectedInterval} / {activeIndicators.length} indicators
-          </p>
-        </div>
-
+    <div className="flex h-full min-h-[520px] flex-col overflow-hidden bg-[#08111d]">
+      <div className="relative min-h-[420px] flex-1">
+        <div ref={containerRef} className="absolute inset-0" />
         {snapshot && (
-          <div className="grid grid-cols-2 gap-x-5 gap-y-1 text-right text-xs sm:grid-cols-5">
-            <div>
-              <p className="text-gray-500">Time</p>
-              <p className="font-mono text-gray-200">{snapshot.time}</p>
+          <div className="pointer-events-none absolute left-3 top-3 z-10 rounded-md bg-[#08111d]/70 px-2 py-1 text-xs backdrop-blur">
+            <div className="mb-2 flex items-center gap-2">
+              <span className="font-semibold text-white">Euro / U.S. Dollar · {selectedInterval} · FXCM</span>
+              <span
+                className={`h-2 w-2 rounded-full ${
+                  streamStatus === "Socket live" ? "bg-emerald-400" : "bg-slate-500"
+                }`}
+              />
+              <span className="text-slate-500">{streamStatus}</span>
             </div>
-            <div>
-              <p className="text-gray-500">O</p>
-              <p className="font-mono text-white">{formatPrice(snapshot.open)}</p>
+            <div className="flex flex-wrap gap-3 font-mono">
+              <span className="text-slate-300">O <b className="font-medium text-emerald-400">{formatPrice(snapshot.open)}</b></span>
+              <span className="text-slate-300">H <b className="font-medium text-emerald-400">{formatPrice(snapshot.high)}</b></span>
+              <span className="text-slate-300">L <b className="font-medium text-emerald-400">{formatPrice(snapshot.low)}</b></span>
+              <span className="text-slate-300">C <b className="font-medium text-emerald-400">{formatPrice(snapshot.close)}</b></span>
             </div>
-            <div>
-              <p className="text-gray-500">H</p>
-              <p className="font-mono text-white">{formatPrice(snapshot.high)}</p>
-            </div>
-            <div>
-              <p className="text-gray-500">L</p>
-              <p className="font-mono text-white">{formatPrice(snapshot.low)}</p>
-            </div>
-            <div>
-              <p className="text-gray-500">C</p>
-              <p className="font-mono text-white">{formatPrice(snapshot.close)}</p>
+            <div className="mt-3 space-y-1 font-mono">
+              {activeIndicators.includes("EMA 20") && <p className="text-slate-300">EMA 20 close <span className="text-blue-400">1.08541</span></p>}
+              {activeIndicators.includes("EMA 50") && <p className="text-slate-300">EMA 50 close <span className="text-amber-400">1.08322</span></p>}
+              {activeIndicators.includes("EMA 200") && <p className="text-slate-300">EMA 200 close <span className="text-violet-400">1.07918</span></p>}
             </div>
           </div>
         )}
-      </div>
-
-      <div className="relative min-h-[420px] flex-1">
-        <div ref={containerRef} className="absolute inset-0" />
+        {levels && (
+          <div className="pointer-events-none absolute right-14 top-[15%] z-10 grid gap-[132px] text-right text-xs font-medium">
+            <span className="text-emerald-400">Resistance {formatPrice(levels.resistance)}</span>
+            <span className="text-blue-400">Support {formatPrice(levels.support)}</span>
+          </div>
+        )}
+        <div className="pointer-events-none absolute bottom-[154px] left-4 z-10 flex h-10 w-10 items-center justify-center rounded-lg bg-[#121826] text-sm font-black text-white shadow-lg">
+          TV
+        </div>
         {loading && (
-          <div className="absolute inset-0 flex items-center justify-center bg-gray-950/80 text-sm text-gray-500">
+          <div className="absolute inset-0 flex items-center justify-center bg-[#08111d]/80 text-sm text-slate-400">
             Loading chart data...
           </div>
         )}
         {!loading && candles.length === 0 && (
-          <div className="absolute inset-0 flex items-center justify-center bg-gray-950 text-sm text-gray-500">
+          <div className="absolute inset-0 flex items-center justify-center bg-[#08111d] text-sm text-slate-400">
             No chart data available
           </div>
         )}
+      </div>
+      <div className="flex h-36 shrink-0 flex-col border-t border-slate-800 bg-[#08111d]">
+        <div className="flex h-8 items-center justify-between border-b border-slate-800 px-3 text-xs">
+          <div className="flex gap-4 text-slate-300">
+            {["1D", "5D", "1M", "3M", "6M", "YTD", "1Y", "5Y", "All"].map((range) => (
+              <button key={range} type="button" className="hover:text-white">
+                {range}
+              </button>
+            ))}
+          </div>
+          <div className="font-mono text-slate-300">13:36:15 (UTC+2) <span className="ml-4">%</span> <span className="ml-3">log</span> <span className="ml-3">auto</span></div>
+        </div>
+        <div className="grid min-h-0 flex-1 grid-rows-2">
+          <div className="border-b border-slate-800 px-3 py-2 text-xs">
+            <span className="text-slate-300">RSI 14 close</span>
+            <span className="ml-3 font-mono text-violet-400">68.21</span>
+          </div>
+          <div className="px-3 py-2 text-xs">
+            <span className="text-slate-300">MACD 12 26 close 9</span>
+            <span className="ml-3 font-mono text-emerald-400">0.00064</span>
+            <span className="ml-3 font-mono text-blue-400">0.00123</span>
+            <span className="ml-3 font-mono text-orange-400">0.00059</span>
+          </div>
+        </div>
       </div>
     </div>
   );
