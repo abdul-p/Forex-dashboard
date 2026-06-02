@@ -30,6 +30,14 @@ export interface ChartCandle {
   close: number;
 }
 
+export interface ExecutionPlan {
+  direction: "Buy" | "Sell";
+  entry: number;
+  stopLoss: number;
+  takeProfit: number;
+  orderType?: string;
+}
+
 interface MainChartEngineProps {
   candles: ChartCandle[];
   selectedPair: string;
@@ -38,6 +46,7 @@ interface MainChartEngineProps {
   activeIndicators: string[];
   loading: boolean;
   onLiveCandle: (candle: ChartCandle) => void;
+  executionPlan?: ExecutionPlan;
 }
 
 interface CrosshairSnapshot {
@@ -292,6 +301,7 @@ export default function MainChartEngine({
   activeIndicators,
   loading,
   onLiveCandle,
+  executionPlan,
 }: MainChartEngineProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const chartRef = useRef<IChartApi | null>(null);
@@ -313,6 +323,36 @@ export default function MainChartEngine({
           })),
     [candles, chartType],
   );
+
+  const executionOverlay = useMemo(() => {
+    if (!executionPlan || candles.length === 0) {
+      return null;
+    }
+
+    const visibleCandles = candles.slice(-120);
+    const values = [
+      ...visibleCandles.flatMap((candle) => [candle.high, candle.low]),
+      executionPlan.entry,
+      executionPlan.stopLoss,
+      executionPlan.takeProfit,
+    ];
+    const high = Math.max(...values);
+    const low = Math.min(...values);
+    const padding = Math.max((high - low) * 0.18, 0.0008);
+    const max = high + padding;
+    const min = low - padding;
+    const span = max - min || 1;
+    const toTop = (price: number) => `${((max - price) / span) * 100}%`;
+
+    return {
+      direction: executionPlan.direction,
+      orderType: executionPlan.orderType ?? "Market",
+      isBuy: executionPlan.direction === "Buy",
+      entryTop: toTop(executionPlan.entry),
+      stopTop: toTop(executionPlan.stopLoss),
+      targetTop: toTop(executionPlan.takeProfit),
+    };
+  }, [candles, executionPlan]);
 
   useEffect(() => {
     candlesRef.current = candles;
@@ -443,6 +483,33 @@ export default function MainChartEngine({
       mainSeriesRef.current = candleSeries;
     }
 
+    if (executionPlan && mainSeriesRef.current) {
+      mainSeriesRef.current.createPriceLine({
+        price: executionPlan.takeProfit,
+        color: "#10b981",
+        lineWidth: 2,
+        lineStyle: 2,
+        axisLabelVisible: true,
+        title: "TP",
+      });
+      mainSeriesRef.current.createPriceLine({
+        price: executionPlan.entry,
+        color: "#60a5fa",
+        lineWidth: 2,
+        lineStyle: 0,
+        axisLabelVisible: true,
+        title: "ENTRY",
+      });
+      mainSeriesRef.current.createPriceLine({
+        price: executionPlan.stopLoss,
+        color: "#ef4444",
+        lineWidth: 2,
+        lineStyle: 2,
+        axisLabelVisible: true,
+        title: "SL",
+      });
+    }
+
     if (activeIndicators.includes("EMA 20") || activeIndicators.includes("EMA")) {
       addOverlay(calculateEma(candles, 20), "#60a5fa", "EMA 20");
     }
@@ -536,7 +603,7 @@ export default function MainChartEngine({
         }
       }
     };
-  }, [activeIndicators, candles, chartType, mainCandles]);
+  }, [activeIndicators, candles, chartType, executionPlan, mainCandles]);
 
   useEffect(() => {
     let socket: Socket | null = null;
@@ -614,6 +681,27 @@ export default function MainChartEngine({
     <div className="flex h-full min-h-[520px] flex-col overflow-hidden bg-[#08111d]">
       <div className="relative min-h-[420px] flex-1">
         <div ref={containerRef} className="absolute inset-0" />
+        {executionOverlay && (
+          <div className="pointer-events-none absolute inset-y-0 left-0 right-14 z-[5]">
+            <div
+              className="absolute left-0 right-0 bg-emerald-500/12"
+              style={{
+                top: executionOverlay.isBuy ? executionOverlay.targetTop : executionOverlay.entryTop,
+                bottom: executionOverlay.isBuy ? `calc(100% - ${executionOverlay.entryTop})` : `calc(100% - ${executionOverlay.targetTop})`,
+              }}
+            />
+            <div
+              className="absolute left-0 right-0 bg-red-500/12"
+              style={{
+                top: executionOverlay.isBuy ? executionOverlay.entryTop : executionOverlay.stopTop,
+                bottom: executionOverlay.isBuy ? `calc(100% - ${executionOverlay.stopTop})` : `calc(100% - ${executionOverlay.entryTop})`,
+              }}
+            />
+            <PlanMarker label="TP" priceLabel="Take Profit" top={executionOverlay.targetTop} tone="profit" />
+            <PlanMarker label={executionOverlay.orderType === "Market" ? "ENTRY" : executionOverlay.orderType} priceLabel={`${executionOverlay.direction} ${executionOverlay.orderType}`} top={executionOverlay.entryTop} tone="entry" />
+            <PlanMarker label="SL" priceLabel="Stop Loss" top={executionOverlay.stopTop} tone="risk" />
+          </div>
+        )}
         {snapshot && (
           <div className="pointer-events-none absolute left-3 top-3 z-10 rounded-md bg-[#08111d]/70 px-2 py-1 text-xs backdrop-blur">
             <div className="mb-2 flex items-center gap-2">
@@ -681,6 +769,36 @@ export default function MainChartEngine({
             <span className="ml-3 font-mono text-orange-400">0.00059</span>
           </div>
         </div>
+      </div>
+    </div>
+  );
+}
+
+function PlanMarker({
+  label,
+  priceLabel,
+  top,
+  tone,
+}: {
+  label: string;
+  priceLabel: string;
+  top: string;
+  tone: "profit" | "risk" | "entry";
+}) {
+  const toneClasses = {
+    profit: "border-emerald-400/70 bg-emerald-500/15 text-emerald-300",
+    risk: "border-red-400/70 bg-red-500/15 text-red-300",
+    entry: "border-blue-400/70 bg-blue-500/15 text-blue-300",
+  };
+
+  return (
+    <div className="absolute left-5 right-0 flex items-center gap-3" style={{ top }}>
+      <div className={`rounded border px-2 py-1 text-[11px] font-bold ${toneClasses[tone]}`}>
+        {label}
+      </div>
+      <div className="h-px flex-1 border-t border-dashed border-current opacity-70" />
+      <div className={`mr-2 rounded border px-2 py-1 text-[11px] font-medium ${toneClasses[tone]}`}>
+        {priceLabel}
       </div>
     </div>
   );

@@ -16,7 +16,7 @@ export default function DashboardLayout({
   const router = useRouter();
   const pathname = usePathname();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const isChartWorkspace = pathname === "/charts";
+  const isChartWorkspace = pathname === "/charts" || pathname === "/trading";
 
   useEffect(() => {
     if (status === "unauthenticated") router.push("/login");
